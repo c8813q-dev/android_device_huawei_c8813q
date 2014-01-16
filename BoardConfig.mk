@@ -80,9 +80,11 @@ TW_EXTERNAL_STORAGE_MOUNT_POINT := "sdcard"
 TW_DEFAULT_EXTERNAL_STORAGE := true
 TW_FLASH_FROM_STORAGE := true 
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/class/android_usb/android0/f_mass_storage/lun%d/file
+#中文版只注释第84.85行,英文版只注释第86行
 BOARD_USE_CUSTOM_RECOVERY_FONT:= \"roboto_10x18.h\"
+TW_BOARD_CUSTOM_GRAPHICS := ../../../device/huawei/c8813q/recovery/graphics.c
+#TW_BOARD_CUSTOM_GRAPHICS := ../../../device/huawei/c8813q/recovery/graphics_cn.c
 RECOVERY_GRAPHICS_USE_LINELENGTH := true
 TW_BRIGHTNESS_PATH := /sys/devices/platform/msm_fb.589824/leds/lcd-backlight/brightness
 TW_MAX_BRIGHTNESS := 255
-TW_BOARD_CUSTOM_GRAPHICS := ../../../device/huawei/c8813q/recovery/graphics.c
 
