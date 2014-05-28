@@ -1,0 +1,95 @@
+From 2ab96c25386b933ae2cf28924eac22063a2d06a3 Mon Sep 17 00:00:00 2001
+From: dianlujitao <dianlujitao@gmail.com>
+Date: Fri, 11 Apr 2014 15:54:25 +0800
+Subject: [PATCH] add statusbar headset icon when headset plug in
+
+Change-Id: I57cf845681b25996708a5b7729cd6203da1fb44f
+---
+ core/res/res/values/config.xml                     |    1 +
+ .../res/drawable-hdpi/stat_sys_headset.png         |  Bin 0 -> 664 bytes
+ .../statusbar/phone/PhoneStatusBarPolicy.java      |   13 +++++++++++++
+ 3 files changed, 14 insertions(+)
+ create mode 100644 packages/SystemUI/res/drawable-hdpi/stat_sys_headset.png
+
+diff --git a/core/res/res/values/config.xml b/core/res/res/values/config.xml
+index 5f7b344..afc5837 100644
+--- a/core/res/res/values/config.xml
++++ b/core/res/res/values/config.xml
+@@ -45,6 +45,7 @@
+        <item><xliff:g id="id">alarm_clock</xliff:g></item>
+        <item><xliff:g id="id">secure</xliff:g></item>
+        <item><xliff:g id="id">clock</xliff:g></item>
++       <item><xliff:g id="id">headset</xliff:g></item>
+     </string-array>
+ 
+     <!-- Flag indicating whether the surface flinger has limited
+diff --git a/packages/SystemUI/res/drawable-hdpi/stat_sys_headset.png b/packages/SystemUI/res/drawable-hdpi/stat_sys_headset.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..7a70aea56ac56505eff472149d53ee01caa715c7
+GIT binary patch
+literal 664
+zcmV;J0%!e+P)<h;3K|Lk000e1NJLTq000{R0012b1^@s6Ta6b;0000PbVXQnQ*UN;
+zcVTj606}DLVr3vnZDD6+Qe|Oed2z{QJOBU!I!Q!9RCwCFmeEIKQ5?tb+(yI@L&OlV
+z8HOR^5;57Qh@OTe<|+2Am;Q!UtJiwjhsZvpM7>0*m)^3gNRgOGY#L=Ftr?SY_xsED
+z=InLOx%bwzKR(=h?(cqo=XdV8zw=A^zVG}mOULlZfDteNdcg-!1jpbEoPz_f1^!r-
+zBr^j=ung*cJgd{cXwpn+maz-Wflr}v$>0*4fE)T1K#m!!wgM*UXUxn47s_mZfX|@I
+zvH}jDPtZTG3+lc2g#$I|cnZcM0+<-%`#$x&aIhS>qQff4yfRQghB`iVb84^+KG+6r
+zZwwS5I&0M32!eSW_ysy!6eysRx?-M-Ju=R{@)g{*_&*lCFTAcu^nLIMvMtUkAWQvy
+z`OoeVwFdg$u~Jn*x65)=<DitKO;UQLa7ob^;aKfC4l?^K*(qC9wL-!rD`+%Usb6(j
+zP$j#vW|l(<v(ovOsed5B_AD=tCJbit|0$^tSt@xm!7j}z<xXd%AhTP;Y}yUW>ll`+
+z-SF&5GIM#cWf7^w3}*8?1Pxa?e@r%LnX$S8gO=wz;qz?QvflZK@0E`@#f#zdOg`|D
+z#!(7sM?|m=rQn8bO?P+(Rr(v9uK7du#N3TN>_MtZplfwEJMUC{Gi-onq8c7sOE(KV
+z-amjPFdy=31K-&U4gYg&C7A8B<(qs2{a~C&)~@a#P7-W6M(-#c)s(5VNGGU!$C_T!
+yVK*$xxz66wXi2_Vmd$IP_YJTJ7UBy06<`23Ie!q$fuRZj0000<MNUMnLSTa3_cM0@
+
+literal 0
+HcmV?d00001
+
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java
+index 6d39ea5..162c62d 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java
+@@ -103,6 +103,9 @@ public class PhoneStatusBarPolicy {
+             else if (action.equals(TtyIntent.TTY_ENABLED_CHANGE_ACTION)) {
+                 updateTTY(intent);
+             }
++            else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {  
++                updateHeadsetState(intent);  
++            }
+         }
+     };
+ 
+@@ -117,6 +120,7 @@ public class PhoneStatusBarPolicy {
+         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
++        filter.addAction(Intent.ACTION_HEADSET_PLUG);
+         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
+         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+@@ -147,6 +151,10 @@ public class PhoneStatusBarPolicy {
+         mService.setIcon("bluetooth", bluetoothIcon, 0, null);
+         mService.setIconVisibility("bluetooth", mBluetoothEnabled);
+ 
++	//Headset
++	mService.setIcon("headset", R.drawable.stat_sys_headset, 0, null);  
++        mService.setIconVisibility("headset", false);
++
+         // Alarm clock
+         mService.setIcon("alarm_clock", R.drawable.stat_sys_alarm, 0, null);
+         mService.setIconVisibility("alarm_clock", false);
+@@ -162,6 +170,11 @@ public class PhoneStatusBarPolicy {
+         updateVolume();
+     }
+ 
++    private final void updateHeadsetState(Intent intent) {  
++        boolean mIsHeadsetOn = (intent.getIntExtra("state", 0) == 1);
++        mService.setIconVisibility("headset", mIsHeadsetOn);  
++    }
++
+     private final void updateAlarm(Intent intent) {
+         boolean alarmSet = intent.getBooleanExtra("alarmSet", false);
+         mService.setIconVisibility("alarm_clock", alarmSet);
+-- 
+1.7.9.5
+
