@@ -74,10 +74,6 @@ PRODUCT_PACKAGES += \
     VisualizationWallpapers
 
 PRODUCT_PACKAGES += \
-    libOmxAacEnc \
-    libOmxAmrEnc \
-    libOmxEvrcEnc \
-    libOmxQcelp13Enc \
     libmm-omxcore \
     libOmxCore \
     libstagefrighthw \
@@ -85,7 +81,8 @@ PRODUCT_PACKAGES += \
     libdivxdrmdecrypt \
     libdashplayer \
     libOmxVdec \
-    libOmxVenc
+    libOmxVenc \
+    qcmediaplayer
 
 PRODUCT_PACKAGES += \
     gps.msm7x27a \
