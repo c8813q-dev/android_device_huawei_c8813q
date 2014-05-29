@@ -292,6 +292,31 @@ void gr_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a
     gl->color4xv(gl, color);
 }
 
+int gr_maxExW(const char *s, void* font, int max_width)
+{
+    GRFont* fnt = (GRFont*) font;
+    int total = 0;
+    unsigned pos;
+    unsigned off;
+
+    if (!fnt)   fnt = gr_font;
+
+    while ((off = *s++))
+    {
+        off -= 32;
+        if (off < 96) {
+            max_width -= (fnt->offset[off+1] - fnt->offset[off]);
+			if (max_width > 0) {
+				total++;
+			} else {
+				return total;
+			}
+		}
+    }
+    return total;
+}
+
+
 int gr_measureEx(const char *s, void* font)
 {
     GRFont* fnt = (GRFont*) font;

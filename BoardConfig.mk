@@ -49,7 +49,7 @@ BOARD_DATA_FILESYSTEM := ext4
 BOARD_DATA_FILESYSTEM_OPTIONS := rw
 
 # Kernel
-BOARD_KERNEL_CMDLINE := androidboot.hardware=huawei
+BOARD_KERNEL_CMDLINE := androidboot.hardware=huawei androidboot.selinux=permissive
 BOARD_KERNEL_BASE := 0x00200000
 BOARD_PAGE_SIZE := 2048
 TARGET_PREBUILT_KERNEL := device/huawei/c8813q/kernel
@@ -62,6 +62,7 @@ BOARD_HAS_NO_SELECT_BUTTON := true
 TARGET_PREBUILT_RECOVERY_KERNEL := device/huawei/c8813q/kernel
 TARGET_RECOVERY_INITRC := device/huawei/c8813q/init.rc
 TARGET_RECOVERY_FSTAB := device/huawei/c8813q/recovery.fstab
+BOARD_HAS_NO_SELECT_BUTTON := true
 BOARD_HAS_LARGE_FILESYSTEM := true
 BOARD_HAS_NO_MISC_PARTITION := true
 BOARD_USES_MMCUTILS := true
@@ -78,12 +79,16 @@ TW_INTERNAL_STORAGE_MOUNT_POINT := "internal_sd"
 TW_EXTERNAL_STORAGE_PATH := "/sdcard"
 TW_EXTERNAL_STORAGE_MOUNT_POINT := "sdcard"
 TW_DEFAULT_EXTERNAL_STORAGE := true
-TW_FLASH_FROM_STORAGE := true 
+TW_FLASH_FROM_STORAGE := true
+TWHAVE_SELINUX := true
+TW_USE_TOOLBOX := true
+TW_TARGET_USES_QCOM_BSP := true
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/class/android_usb/android0/f_mass_storage/lun%d/file
-#中文版只注释第84.85行,英文版只注释第86行
-BOARD_USE_CUSTOM_RECOVERY_FONT:= \"roboto_10x18.h\"
-TW_BOARD_CUSTOM_GRAPHICS := ../../../device/huawei/c8813q/recovery/graphics.c
-#TW_BOARD_CUSTOM_GRAPHICS := ../../../device/huawei/c8813q/recovery/graphics_cn.c
+BOARD_UMS_LUNFILE := "/sys/class/android_usb/android0/f_mass_storage/lun%d/file"
+#中文版只注释第89.90行,英文版只注释第91行
+# BOARD_USE_CUSTOM_RECOVERY_FONT:= \"roboto_10x18.h\"
+# TW_BOARD_CUSTOM_GRAPHICS := ../../../device/huawei/c8813q/recovery/graphics.c
+TW_BOARD_CUSTOM_GRAPHICS := ../../../device/huawei/c8813q/recovery/graphics_cn.c
 RECOVERY_GRAPHICS_USE_LINELENGTH := true
 TW_BRIGHTNESS_PATH := /sys/devices/platform/msm_fb.589824/leds/lcd-backlight/brightness
 TW_MAX_BRIGHTNESS := 255

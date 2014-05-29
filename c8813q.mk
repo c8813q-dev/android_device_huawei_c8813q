@@ -29,4 +29,5 @@ device/huawei/c8813q/recovery/sbin/rmt_storage_recovery:/recovery/root/sbin/rmt_
 device/huawei/c8813q/recovery/sbin/rmt_oeminfo_recovery:/recovery/root/sbin/rmt_oeminfo_recovery \
 device/huawei/c8813q/recovery/sbin/linker:/recovery/root/sbin/linker \
 device/huawei/c8813q/recovery/sbin/charge.sh:/recovery/root/sbin/charge.sh \
-device/huawei/c8813q/recovery/tp/1191601.img:root/tp/1191601.img
+device/huawei/c8813q/recovery/tp/1191601.img:root/tp/1191601.img \
+device/huawei/c8813q/recovery/umountusb.sh:root/umountusb.sh
