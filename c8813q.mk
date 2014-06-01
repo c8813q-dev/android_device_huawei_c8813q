@@ -154,11 +154,7 @@ PRODUCT_COPY_FILES += \
     device/huawei/c8813q/keylayout/surf_keypad.kl:system/usr/keylayout/surf_keypad.kl
 
 # Properties
-
-# transmitter isn't supported
 PRODUCT_PROPERTY_OVERRIDES += \
-#    ro.fm.mulinst.recording.support=false \
-#    ro.fm.analogpath.supported=false \
     ro.fm.transmitter=false
 
 PRODUCT_PROPERTY_OVERRIDES += \
