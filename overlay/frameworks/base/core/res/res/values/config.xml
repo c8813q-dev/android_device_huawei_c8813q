@@ -191,6 +191,9 @@
          config to 7. -->
     <integer name="config_deviceHardwareKeys">7</integer>
 
-	<!-- Boolean indicating whether Softap requires reloading AP firmware -->
+    <!-- Boolean indicating whether Softap requires reloading AP firmware -->
     <bool name="config_wifiApFirmwareReload">false</bool>
+
+    <!-- Device supports LED flashlight -->
+    <bool name="config_enableTorch">true</bool>
 </resources>
