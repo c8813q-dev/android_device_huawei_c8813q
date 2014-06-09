@@ -1,6 +1,6 @@
-From d95a76e3556eaf5eabdfd43f9f0230373e188f18 Mon Sep 17 00:00:00 2001
-From: dhacker29 <davidhackerdvm@gmail.com>
-Date: Sat, 17 Aug 2013 16:35:18 -0500
+From f127460341c1c31f2f3409eab3cf7b222acfb4f9 Mon Sep 17 00:00:00 2001
+From: dianlujitao <dianlujitao@gmail.com>
+Date: Mon, 9 Jun 2014 21:43:37 +0800
 Subject: [PATCH] Add setting for Vold Switchable Pair (2/2)
 
 This will be hidden unless the device has non-emulated internal storage
@@ -8,40 +8,42 @@ and an external SD, in which case persist.sys.vold.switchablepair will be
 set automaticaly.  This does away with the need for ro.vold.switchablepair
 to be set in the build.prop.
 
-Change-Id: Id83fc90d771ca3a7179f2c50d0ae828eb3dbaa9f
+Change-Id: I3f234a0129311a8568663297f608e80673ba1493
 ---
- AndroidManifest.xml                             |  1 +
- res/values/cm_strings.xml                       |  7 ++++
- res/xml/device_info_memory.xml                  |  5 +++
- src/com/android/settings/deviceinfo/Memory.java | 54 ++++++++++++++++++++++++-
- 4 files changed, 66 insertions(+), 1 deletion(-)
+ res/values-zh-rCN/cm_strings.xml                |    5 +++
+ res/values/cm_strings.xml                       |    7 +++
+ res/xml/device_info_memory.xml                  |    5 +++
+ src/com/android/settings/deviceinfo/Memory.java |   53 ++++++++++++++++++++++-
+ 4 files changed, 69 insertions(+), 1 deletion(-)
 
-diff --git a/AndroidManifest.xml b/AndroidManifest.xml
-index 5825e8e..5993e07 100644
---- a/AndroidManifest.xml
-+++ b/AndroidManifest.xml
-@@ -72,6 +72,7 @@
-     <uses-permission android:name="android.permission.CHANGE_PRIVACY_GUARD_STATE" />
-     <uses-permission android:name="android.permission.READ_PHONE_BLACKLIST" />
-     <uses-permission android:name="android.permission.CHANGE_PHONE_BLACKLIST" />
-+    <uses-permission android:name="android.permission.REBOOT" />
- 
-     <permission
-         android:name="android.permission.REQUEST_SUPERUSER"
+diff --git a/res/values-zh-rCN/cm_strings.xml b/res/values-zh-rCN/cm_strings.xml
+index 70c8703..edfe14d 100644
+--- a/res/values-zh-rCN/cm_strings.xml
++++ b/res/values-zh-rCN/cm_strings.xml
+@@ -873,4 +873,9 @@
+   <string name="autoperf_title">启用单应用配置</string>
+   <string name="autoperf_summary">自动为各种应用选择适当的性能配置</string>
+   <string name="graphics_title">图形和渲染</string>
++  <string name="storage_switch_title">默认存储位置切换</string>
++  <string name="storage_switch_summary_off">使用内置存储存放数据</string>
++  <string name="storage_switch_summary_on">使用SD卡存放数据</string>
++  <string name="reboot_prompt_title">需要重启</string>
++  <string name="reboot_prompt_message">"为了应用改变，需要重启设备。\n\n你是否想现在重启？"</string>
+ </resources>
 diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
-index ed81926..6667e5a 100644
+index 8b54aba..5f2b544 100644
 --- a/res/values/cm_strings.xml
 +++ b/res/values/cm_strings.xml
-@@ -700,6 +700,13 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
+@@ -734,6 +734,13 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
      <string name="adb_notify">USB debugging notify</string>
      <string name="adb_notify_summary">Display a notification when USB debugging is connected</string>
  
 +    <!-- Vold Switchable Pair -->
-+    <string name="storage_switch_title">使用SD卡作为默认存储</string>
-+    <string name="storage_switch_summary_off">使用内置存储存放数据</string>
-+    <string name="storage_switch_summary_on">使用SD卡存放数据</string>
-+    <string name="reboot_prompt_title">需要重启</string>
-+    <string name="reboot_prompt_message">为了应用改变，需要重启设备。\n\n你是否想现在重启？</string>
++    <string name="storage_switch_title">Use external SD as primary</string>
++    <string name="storage_switch_summary_off">Using expanded internal storage for apps and media</string>
++    <string name="storage_switch_summary_on">Using SD Card for apps and media</string>
++    <string name="reboot_prompt_title">Reboot required</string>
++    <string name="reboot_prompt_message">In order to apply the changed configuration, a reboot is required.\n\nDo you want to reboot now?</string>
 +
      <!-- Android debugging over WiFi -->
      <string name="adb_over_network">ADB over network</string>
@@ -63,7 +65,7 @@ index e905f39..2010b2c 100644
  <!-- Preference categories are dynamically created based on the list of available storage volumes -->
  
 diff --git a/src/com/android/settings/deviceinfo/Memory.java b/src/com/android/settings/deviceinfo/Memory.java
-index 52fef32..5b79865 100644
+index 52fef32..ab59290 100644
 --- a/src/com/android/settings/deviceinfo/Memory.java
 +++ b/src/com/android/settings/deviceinfo/Memory.java
 @@ -32,16 +32,20 @@ import android.hardware.usb.UsbManager;
@@ -141,11 +143,10 @@ index 52fef32..5b79865 100644
              ConfirmClearCacheFragment.show(this);
              return true;
          }
-@@ -423,4 +458,21 @@ public class Memory extends SettingsPreferenceFragment {
+@@ -423,4 +458,20 @@ public class Memory extends SettingsPreferenceFragment {
              return builder.create();
          }
      }
-+
 +    private void showRebootPrompt() {
 +        AlertDialog dialog = new AlertDialog.Builder(getActivity())
 +                .setTitle(R.string.reboot_prompt_title)
@@ -164,4 +165,5 @@ index 52fef32..5b79865 100644
 +    }
  }
 -- 
-1.8.1.2
+1.7.9.5
+
