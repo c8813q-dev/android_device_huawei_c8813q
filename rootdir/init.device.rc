@@ -96,6 +96,12 @@ service thermald /system/bin/thermald
     user root
     group root
 
+on property:persist.sys.thermal.monitor=1
+    start thermald
+
+on property:persist.sys.thermal.monitor=0
+    stop thermald
+
 service gpu_dcvsd /system/bin/gpu_dcvsd
     class late_start
     user root

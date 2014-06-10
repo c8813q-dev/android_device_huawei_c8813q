@@ -204,6 +204,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
     wifi.interface=eth0 \
     wifi.supplicant_scan_interval=60
 
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.sys.thermal.monitor=1
+
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full.mk)
 
 $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
