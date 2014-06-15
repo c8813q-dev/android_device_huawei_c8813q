@@ -223,3 +223,5 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full.mk)
 $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
 
 $(call inherit-product-if-exists, vendor/huawei/c8813q/c8813q-vendor.mk)
+
+$(call inherit-product-if-exists, vendor/dianlujitao/blobs.mk)
