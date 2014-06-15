@@ -84,6 +84,17 @@ PRODUCT_PACKAGES += \
     libOmxVenc \
     qcmediaplayer
 
+# stagefright cmdline tools
+PRODUCT_PACKAGES += \
+    stagefright \
+    record \
+    recordvideo \
+    audioloop \
+    stream \
+    sf2 \
+    codec \
+    muxer
+
 PRODUCT_PACKAGES += \
     gps.msm7x27a \
     lights.msm7x27a
