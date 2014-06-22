@@ -1,4 +1,4 @@
-From 7bdd0f558bff7fbea8dd1f147c93eb3ccc4d6921 Mon Sep 17 00:00:00 2001
+From 607b5d9241b219b32777b90341e627810a6a915a Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@gmail.com>
 Date: Mon, 9 Jun 2014 21:56:17 +0800
 Subject: [PATCH] Add thermald options, credits to ZJL
@@ -12,10 +12,10 @@ Change-Id: Ifc83e346f6b4425c7dc276df044326a9f0a39f7a
  4 files changed, 36 insertions(+)
 
 diff --git a/res/values-zh-rCN/cm_strings.xml b/res/values-zh-rCN/cm_strings.xml
-index edfe14d..9373ab7 100644
+index de72b4f..283221b 100644
 --- a/res/values-zh-rCN/cm_strings.xml
 +++ b/res/values-zh-rCN/cm_strings.xml
-@@ -878,4 +878,7 @@
+@@ -866,4 +866,7 @@
    <string name="storage_switch_summary_on">使用SD卡存放数据</string>
    <string name="reboot_prompt_title">需要重启</string>
    <string name="reboot_prompt_message">"为了应用改变，需要重启设备。\n\n你是否想现在重启？"</string>
@@ -24,10 +24,10 @@ index edfe14d..9373ab7 100644
 +  <string name="thermal_off_summary">温控调节模式已关闭，可以手动锁定最高频率</string>
  </resources>
 diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
-index 5f2b544..b342ab2 100644
+index bb64854..c967409 100644
 --- a/res/values/cm_strings.xml
 +++ b/res/values/cm_strings.xml
-@@ -741,6 +741,11 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
+@@ -717,6 +717,11 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
      <string name="reboot_prompt_title">Reboot required</string>
      <string name="reboot_prompt_message">In order to apply the changed configuration, a reboot is required.\n\nDo you want to reboot now?</string>
  
