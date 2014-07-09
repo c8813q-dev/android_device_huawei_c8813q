@@ -1,28 +1,30 @@
-From c50889a46b58a46b8e64028328f68626269b7e4a Mon Sep 17 00:00:00 2001
-From: Daz Jones <yuki@thebronasium.com>
-Date: Fri, 7 Feb 2014 01:41:29 +0100
+From 71582ca010a5bdbdaf8288c3269c2bd6d4413e67 Mon Sep 17 00:00:00 2001
+From: dianlujitao <dianlujitao@gmail.com>
+Date: Wed, 9 Jul 2014 21:55:14 +0800
 Subject: [PATCH] minui: display-legacy says NO
 
-ergh
+Change-Id: I146559c0939c4d6a0be2f9969931d9d372ebea5c
 ---
- minui/Android.mk | 4 ----
- 1 file changed, 4 deletions(-)
+ minui/Android.mk |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/minui/Android.mk b/minui/Android.mk
-index 2d3198a..640bb15 100644
+index 09ac042..398f97b 100644
 --- a/minui/Android.mk
 +++ b/minui/Android.mk
-@@ -17,10 +17,6 @@ ifeq ($(call is-vendor-board-platform,QCOM),true)
+@@ -23,9 +23,9 @@ ifeq ($(call is-vendor-board-platform,QCOM),true)
    LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
  endif
  
 -ifeq ($(TARGET_USES_QCOM_BSP), true)
 -    LOCAL_CFLAGS += -DMSM_BSP
 -endif
--
- LOCAL_MODULE := libminui
++#ifeq ($(TARGET_USES_QCOM_BSP), true)
++#    LOCAL_CFLAGS += -DMSM_BSP
++#endif
+ endif
  
- # This used to compare against values in double-quotes (which are just
+ LOCAL_MODULE := libminui
 -- 
-1.8.1.2
+1.7.9.5
 
