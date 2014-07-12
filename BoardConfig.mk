@@ -42,6 +42,7 @@ BOARD_USES_QCOM_HARDWARE := true
 COMMON_GLOBAL_CFLAGS += -DQCOM_BSP -DQCOM_HARDWARE
 TARGET_USES_ION := true
 TARGET_USES_QCOM_BSP := true
+TARGET_USE_QCOM_BIONIC_OPTIMIZATION := true
 
 # Compiler flags
 TARGET_GLOBAL_CFLAGS += -mfloat-abi=softfp -mfpu=neon-vfpv4 -mtune=cortex-a5
