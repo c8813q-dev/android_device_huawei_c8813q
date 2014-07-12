@@ -1,29 +1,15 @@
-From 9d2bcb466b486fc8efc4669a8280c3fe568bbdf0 Mon Sep 17 00:00:00 2001
+From ca77b418ced2f50a5a26849e12d1cb336c623954 Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@gmail.com>
-Date: Sun, 11 May 2014 12:23:03 +0800
+Date: Sat, 12 Jul 2014 19:11:33 +0800
 Subject: [PATCH] fix omx on msm7x27a
 
-Change-Id: I3a0f710c91f1633652e056ef173b5e63e92141e4
+Change-Id: If492fa3bd54cf15b813b9020adbb557f601f6cdc
 ---
- media/libmedia/Android.mk                          |    2 +-
  media/libmediaplayerservice/Android.mk             |    4 ++++
  .../libmediaplayerservice/StagefrightRecorder.cpp  |    8 ++++++++
- media/libstagefright/Android.mk                    |    6 +++++-
- 4 files changed, 18 insertions(+), 2 deletions(-)
+ media/libstagefright/Android.mk                    |    4 ++++
+ 3 files changed, 16 insertions(+)
 
-diff --git a/media/libmedia/Android.mk b/media/libmedia/Android.mk
-index 8204ee2..63ff6c3 100644
---- a/media/libmedia/Android.mk
-+++ b/media/libmedia/Android.mk
-@@ -79,7 +79,7 @@ LOCAL_CFLAGS += -DUSE_SAMSUNG_SEPARATEDSTREAM
- endif
- 
- ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
--    ifneq ($(filter caf bfam,$(TARGET_QCOM_AUDIO_VARIANT)),)
-+    ifneq ($(filter caf bfam legacy,$(TARGET_QCOM_AUDIO_VARIANT)),)
-         ifeq ($(BOARD_USES_LEGACY_ALSA_AUDIO),true)
-             LOCAL_SRC_FILES += IDirectTrack.cpp IDirectTrackClient.cpp
-         endif
 diff --git a/media/libmediaplayerservice/Android.mk b/media/libmediaplayerservice/Android.mk
 index badb84c..1c8c32d 100644
 --- a/media/libmediaplayerservice/Android.mk
@@ -73,19 +59,10 @@ index 81c0862..1441563 100644
  
      // Do not wait for all the input buffers to become available.
 diff --git a/media/libstagefright/Android.mk b/media/libstagefright/Android.mk
-index 3c56a42..f662bec 100644
+index 4386723..07a3512 100644
 --- a/media/libstagefright/Android.mk
 +++ b/media/libstagefright/Android.mk
-@@ -93,7 +93,7 @@ else
- LOCAL_C_INCLUDES += $(TOP)/frameworks/native/include/media/openmax
- endif
- 
--ifneq ($(filter caf bfam,$(TARGET_QCOM_AUDIO_VARIANT)),)
-+ifneq ($(filter caf bfam legacy,$(TARGET_QCOM_AUDIO_VARIANT)),)
-     ifeq ($(BOARD_USES_LEGACY_ALSA_AUDIO),true)
-         ifeq ($(call is-chipset-in-board-platform,msm8960),true)
-             LOCAL_SRC_FILES += LPAPlayerALSA.cpp TunnelPlayer.cpp
-@@ -114,6 +114,10 @@ ifneq ($(filter caf bfam,$(TARGET_QCOM_AUDIO_VARIANT)),)
+@@ -115,6 +115,10 @@ ifneq ($(filter caf bfam,$(TARGET_QCOM_AUDIO_VARIANT)),)
              LOCAL_SRC_FILES += LPAPlayer.cpp
              LOCAL_CFLAGS += -DLEGACY_LPA -DUSE_LPA_MODE
          endif
