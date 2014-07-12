@@ -50,7 +50,7 @@ TARGET_GLOBAL_CPPFLAGS += -mfloat-abi=softfp -mfpu=neon-vfpv4 -mtune=cortex-a5
 # Audio
 TARGET_HAS_QACT := true
 BOARD_USES_LEGACY_ALSA_AUDIO := true
-TARGET_QCOM_AUDIO_VARIANT := legacy
+TARGET_QCOM_AUDIO_VARIANT := caf
 TARGET_PROVIDES_LIBAUDIO := true
 
 # Bluetooth
