@@ -139,7 +139,6 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_COPY_FILES += \
     device/huawei/c8813q/configs/AudioFilter.csv:system/etc/AudioFilter.csv \
-    device/huawei/c8813q/configs/apns-conf.xml:system/etc/apns-conf.xml \
     device/huawei/c8813q/configs/thermald.conf:system/etc/thermald.conf \
     device/huawei/c8813q/configs/thermald-8x25-msm1-pmic_therm.conf:system/etc/thermald-8x25-msm1-pmic_therm.conf \
     device/huawei/c8813q/configs/thermald-C8813Q.conf:system/etc/thermald-C8813Q.conf \
