@@ -217,6 +217,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.sys.thermal.monitor=1
 
+PRODUCT_PROPERTY_OVERRIDES += \
+    debug.gralloc.map_fb_memory=1
+
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full.mk)
 
 $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
