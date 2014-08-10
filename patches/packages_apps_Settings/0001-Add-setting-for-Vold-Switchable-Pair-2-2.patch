@@ -1,4 +1,4 @@
-From ed72a6f75647ae515a7262cef46593301581596f Mon Sep 17 00:00:00 2001
+From 2281e82e48b4e158e7141a9aea8ce13ad480bb9f Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@gmail.com>
 Date: Mon, 9 Jun 2014 21:43:37 +0800
 Subject: [PATCH] Add setting for Vold Switchable Pair (2/2)
@@ -17,13 +17,13 @@ Change-Id: I3f234a0129311a8568663297f608e80673ba1493
  4 files changed, 69 insertions(+), 1 deletion(-)
 
 diff --git a/res/values-zh-rCN/cm_strings.xml b/res/values-zh-rCN/cm_strings.xml
-index 24b4393..5393166 100644
+index 73f3f67..24deca7 100644
 --- a/res/values-zh-rCN/cm_strings.xml
 +++ b/res/values-zh-rCN/cm_strings.xml
-@@ -886,4 +886,9 @@
-   <string name="show_dev_already_cm">没有必要，您已启用开发者选项。</string>
-   <string name="enable_adb_cm">Android 调试</string>
-   <string name="enable_adb_summary_cm">开启 Android Debug Bridge (adb) 界面</string>
+@@ -907,4 +907,9 @@
+   <string name="block_notifications_title">通知过滤</string>
+   <string name="block_notifications_summary">管理已忽略的通知和过滤器</string>
+   <string name="no_filters_title">没有设置过滤</string>
 +  <string name="storage_switch_title">默认存储位置切换</string>
 +  <string name="storage_switch_summary_off">使用内置存储存放数据</string>
 +  <string name="storage_switch_summary_on">使用SD卡存放数据</string>
@@ -31,10 +31,10 @@ index 24b4393..5393166 100644
 +  <string name="reboot_prompt_message">"为了应用改变，需要重启设备。\n\n你是否想现在重启？"</string>
  </resources>
 diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
-index 0c96cdd..f593715 100644
+index 4e3c899..891185a41 100644
 --- a/res/values/cm_strings.xml
 +++ b/res/values/cm_strings.xml
-@@ -725,6 +725,13 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
+@@ -733,6 +733,13 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
      <string name="adb_notify">USB debugging notify</string>
      <string name="adb_notify_summary">Display a notification when USB debugging is connected</string>
  
