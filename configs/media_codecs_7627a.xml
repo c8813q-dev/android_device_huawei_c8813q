@@ -79,6 +79,7 @@
             <Quirk name="requires-allocate-on-output-ports" />
             <Quirk name="requires-global-flush" />
         </MediaCodec>
+	<!--
         <MediaCodec name="OMX.qcom.audio.decoder.wma" type="audio/x-ms-wma" >
             <Quirk name="requires-global-flush" />
             <Quirk name="requires-wma-pro-component" />
@@ -91,6 +92,7 @@
             <Quirk name="requires-global-flush" />
             <Quirk name="requires-wma-pro-component" />
         </MediaCodec>
+	-->
         <MediaCodec name="OMX.qcom.audio.decoder.mp3" type="audio/mpeg" >
             <Quirk name="requires-global-flush" />
         </MediaCodec>
