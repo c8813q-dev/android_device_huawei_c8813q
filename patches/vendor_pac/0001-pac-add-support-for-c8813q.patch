@@ -1,0 +1,50 @@
+From 2aec420cdd336b4f9da728452937f5e4ab141cef Mon Sep 17 00:00:00 2001
+From: dianlujitao <dianlujitao@gmail.com>
+Date: Wed, 20 Aug 2014 20:37:28 +0800
+Subject: [PATCH] pac: add support for c8813q
+
+Change-Id: I50634565121601fa2dc37b0f57ddb9ca2e7ed737
+---
+ products/pac_c8813q.mk |   30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+ create mode 100644 products/pac_c8813q.mk
+
+diff --git a/products/pac_c8813q.mk b/products/pac_c8813q.mk
+new file mode 100644
+index 0000000..2ea2358
+--- /dev/null
++++ b/products/pac_c8813q.mk
+@@ -0,0 +1,30 @@
++# Check for target product
++ifeq (pac_c8813q,$(TARGET_PRODUCT))
++
++# OVERLAY_TARGET adds overlay asset source
++OVERLAY_TARGET := pa_hdpi
++
++# PAC device overlay
++PRODUCT_PACKAGE_OVERLAYS += vendor/pac/overlay/pac/hdpi_480x854
++
++# PAC boot logo
++PRODUCT_COPY_FILES += \
++    vendor/pac/prebuilt/common/bootlogo/pac_logo_480x854.rle:root/initlogo.rle
++
++# Copy bootanimation
++PRODUCT_COPY_FILES += \
++    vendor/pac/prebuilt/480x854/bootanimation.zip:system/media/bootanimation.zip
++
++# include PAC common configuration
++include vendor/pac/config/pac_common.mk
++
++# Inherit CM device configuration
++$(call inherit-product, device/huawei/c8813q/cm.mk)
++
++PRODUCT_NAME := pac_c8813q
++
++# Update local_manifest.xml
++GET_PROJECT_RMS := $(shell vendor/pac/tools/removeprojects.py $(PRODUCT_NAME))
++GET_PROJECT_ADDS := $(shell vendor/pac/tools/addprojects.py $(PRODUCT_NAME))
++
++endif
+-- 
+1.7.9.5
+
