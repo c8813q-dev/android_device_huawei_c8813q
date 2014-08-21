@@ -1,4 +1,4 @@
-From cbc0d9876cf17215387ff42cce80def8129a9e7d Mon Sep 17 00:00:00 2001
+From e5da53b69bab3e85b9399a5808ec5d7081242157 Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@gmail.com>
 Date: Sun, 1 Jun 2014 13:58:17 +0800
 Subject: [PATCH] add statusbar headset icon when headset plug in
@@ -11,14 +11,14 @@ Change-Id: I00bd3b27df17dc80d847db84fabaf99aa7446935
  core/res/res/values/config.xml                     |    1 +
  .../res/drawable-xhdpi/stat_sys_headset.png        |  Bin 0 -> 499 bytes
  .../res/drawable-xhdpi/stat_sys_headset_mic.png    |  Bin 0 -> 1529 bytes
- packages/SystemUI/res/values/strings.xml           |    2 ++
+ packages/SystemUI/res/values/strings.xml           |    4 ++-
  .../statusbar/phone/PhoneStatusBarPolicy.java      |   29 ++++++++++++++++++++
- 5 files changed, 32 insertions(+)
+ 5 files changed, 33 insertions(+), 1 deletion(-)
  create mode 100644 packages/SystemUI/res/drawable-xhdpi/stat_sys_headset.png
  create mode 100644 packages/SystemUI/res/drawable-xhdpi/stat_sys_headset_mic.png
 
 diff --git a/core/res/res/values/config.xml b/core/res/res/values/config.xml
-index 0ab3264..79a113d 100644
+index fde3d65..a101764 100644
 --- a/core/res/res/values/config.xml
 +++ b/core/res/res/values/config.xml
 @@ -45,6 +45,7 @@
@@ -76,16 +76,18 @@ literal 0
 HcmV?d00001
 
 diff --git a/packages/SystemUI/res/values/strings.xml b/packages/SystemUI/res/values/strings.xml
-index e36ca8e..8d9732f 100644
+index 0ea1034..58568cd 100644
 --- a/packages/SystemUI/res/values/strings.xml
 +++ b/packages/SystemUI/res/values/strings.xml
 @@ -507,4 +507,6 @@
           linebreak to position it correctly.  [CHAR LIMIT=45] -->
      <string name="ssl_ca_cert_warning">Network may\nbe monitored</string>
  
-+<string name="headset_enabled">Headset Enabled.</string>
+-</resources>
+\ No newline at end of file
++    <string name="headset_enabled">Headset Enabled.</string>
 +
- </resources>
++</resources>
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java
 index 6d39ea5..1675ef3 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java
