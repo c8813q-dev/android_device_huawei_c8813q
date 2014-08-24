@@ -1,4 +1,4 @@
-From 2281e82e48b4e158e7141a9aea8ce13ad480bb9f Mon Sep 17 00:00:00 2001
+From 18cd656d3a8aa88ad547e65a32ed064bbd12a004 Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@gmail.com>
 Date: Mon, 9 Jun 2014 21:43:37 +0800
 Subject: [PATCH] Add setting for Vold Switchable Pair (2/2)
@@ -17,21 +17,23 @@ Change-Id: I3f234a0129311a8568663297f608e80673ba1493
  4 files changed, 69 insertions(+), 1 deletion(-)
 
 diff --git a/res/values-zh-rCN/cm_strings.xml b/res/values-zh-rCN/cm_strings.xml
-index 73f3f67..24deca7 100644
+index 910db0b..f13cffc 100644
 --- a/res/values-zh-rCN/cm_strings.xml
 +++ b/res/values-zh-rCN/cm_strings.xml
-@@ -907,4 +907,9 @@
-   <string name="block_notifications_title">通知过滤</string>
-   <string name="block_notifications_summary">管理已忽略的通知和过滤器</string>
-   <string name="no_filters_title">没有设置过滤</string>
+@@ -16,6 +16,11 @@
+      limitations under the License.
+ -->
+ <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 +  <string name="storage_switch_title">默认存储位置切换</string>
 +  <string name="storage_switch_summary_off">使用内置存储存放数据</string>
 +  <string name="storage_switch_summary_on">使用SD卡存放数据</string>
 +  <string name="reboot_prompt_title">需要重启</string>
 +  <string name="reboot_prompt_message">"为了应用改变，需要重启设备。\n\n你是否想现在重启？"</string>
- </resources>
+   <string name="wifi_setting_countrycode_title">WLAN 区域代码</string>
+   <string name="wifi_setting_countrycode_summary">指定 WLAN 使用的区域码</string>
+   <string name="wifi_setting_countrycode_error">设置区域码时遇到了问题。</string>
 diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
-index 4e3c899..891185a41 100644
+index 9ec527b..655722b 100644
 --- a/res/values/cm_strings.xml
 +++ b/res/values/cm_strings.xml
 @@ -733,6 +733,13 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
