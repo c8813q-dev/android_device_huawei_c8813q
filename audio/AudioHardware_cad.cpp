@@ -1388,19 +1388,8 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
             new_snd_device = SND_DEVICE_STEREO_HEADSET_AND_SPEAKER;
 #endif
 #ifdef QCOM_FM_ENABLED
-        } else if ((outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADPHONE) &&
+        } else if ((outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET) &&
                    (outputDevices & AudioSystem::DEVICE_OUT_FM)) {
-            if( !isFMAnalog() ){
-                ALOGI("Routing FM to Wired Headphone\n");
-                new_snd_device = SND_DEVICE_FM_DIGITAL_STEREO_HEADSET;
-                enableDgtlFmDriver = true;
-            } else{
-                ALOGW("Enabling Anlg FM + codec device\n");
-                new_snd_device = SND_DEVICE_FM_ANALOG_STEREO_HEADSET_CODEC;
-                enableDgtlFmDriver = false;
-            }
-          } else if ((outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET) &&
-                    (outputDevices & AudioSystem::DEVICE_OUT_FM)) {
             if( !isFMAnalog() ){
                 ALOGI("Routing FM to Wired Headset\n");
                 new_snd_device = SND_DEVICE_FM_DIGITAL_STEREO_HEADSET;
@@ -1429,7 +1418,7 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
             new_snd_device = SND_DEVICE_HEADSET;
         } else if (outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADPHONE) {
             ALOGI("Routing audio to Wired Headphone\n");
-            new_snd_device = SND_DEVICE_HEADPHONE;
+            new_snd_device = SND_DEVICE_HEADSET;
         } else if (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER) {
             ALOGI("Routing audio to Speakerphone\n");
             new_snd_device = SND_DEVICE_SPEAKER;
