@@ -1,4 +1,4 @@
-From 8b9b0d360879b8b6e632b8a11f2426667d2c88d8 Mon Sep 17 00:00:00 2001
+From 3ea8fc900da41ee970c6fd1395b68e9128ce7d17 Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@gmail.com>
 Date: Mon, 9 Jun 2014 21:56:17 +0800
 Subject: [PATCH] Add thermald options, credits to ZJL
@@ -8,8 +8,8 @@ Change-Id: Ifc83e346f6b4425c7dc276df044326a9f0a39f7a
  res/values-zh-rCN/cm_strings.xml                   |    3 +++
  res/values/cm_strings.xml                          |    5 ++++
  res/xml/performance_settings.xml                   |    4 ++++
- .../settings/cyanogenmod/PerformanceSettings.java  |   25 ++++++++++++++++++++
- 4 files changed, 37 insertions(+)
+ .../settings/cyanogenmod/PerformanceSettings.java  |   24 ++++++++++++++++++++
+ 4 files changed, 36 insertions(+)
 
 diff --git a/res/values-zh-rCN/cm_strings.xml b/res/values-zh-rCN/cm_strings.xml
 index f13cffc..26527aa 100644
@@ -26,10 +26,10 @@ index f13cffc..26527aa 100644
    <string name="wifi_setting_countrycode_summary">指定 WLAN 使用的区域码</string>
    <string name="wifi_setting_countrycode_error">设置区域码时遇到了问题。</string>
 diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
-index 790ad15..4fd52f6 100644
+index 655722b..040d848 100644
 --- a/res/values/cm_strings.xml
 +++ b/res/values/cm_strings.xml
-@@ -732,6 +732,11 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
+@@ -740,6 +740,11 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
      <string name="reboot_prompt_title">Reboot required</string>
      <string name="reboot_prompt_message">In order to apply the changed configuration, a reboot is required.\n\nDo you want to reboot now?</string>
  
@@ -42,12 +42,12 @@ index 790ad15..4fd52f6 100644
      <string name="adb_over_network">ADB over network</string>
      <string name="adb_over_network_summary">Enable TCP/IP debugging over network interfaces (Wi-Fi, USB networks). This setting is reset on reboot</string>
 diff --git a/res/xml/performance_settings.xml b/res/xml/performance_settings.xml
-index df3c511..092ecf4 100644
+index c6064e1..bbf3779 100644
 --- a/res/xml/performance_settings.xml
 +++ b/res/xml/performance_settings.xml
-@@ -78,4 +78,8 @@
-         android:entries="@array/entries_scrollingcache"
-         android:entryValues="@array/values_scrollingcache" />
+@@ -71,4 +71,8 @@
+             android:summary="@string/pref_force_highend_gfx_summary" />
+     </PreferenceCategory>
  
 +        <CheckBoxPreference
 +            android:key="set_thermal"
@@ -55,22 +55,21 @@ index df3c511..092ecf4 100644
 +
  </PreferenceScreen>
 diff --git a/src/com/android/settings/cyanogenmod/PerformanceSettings.java b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
-index 1251f7f..81629a7 100644
+index 15a93ac..135500c 100644
 --- a/src/com/android/settings/cyanogenmod/PerformanceSettings.java
 +++ b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
-@@ -61,6 +61,11 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+@@ -56,6 +56,10 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
  
-     private static final String SCROLLINGCACHE_PERSIST_PROP = "persist.sys.scrollingcache";
- 
-+    /* For Thermald Switch by ZJL@Anzhi */
+     private static final String FORCE_HIGHEND_GFX_PREF = "pref_force_highend_gfx";
+     private static final String FORCE_HIGHEND_GFX_PERSIST_PROP = "persist.sys.force_highendgfx";
++/* For Thermald Switch by ZJL@Anzhi */
 +    private CheckBoxPreference mThermal;
 +    public static final String THERMAL_PROPERTY = "persist.sys.thermal.monitor";
 +    private static final String THERMAL_KEY = "set_thermal";
-+
-     private static final String SCROLLINGCACHE_DEFAULT = "2";
  
-     private ListPreference mScrollingCachePref;
-@@ -140,6 +145,13 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+     private ListPreference mPerfProfilePref;
+     private CheckBoxPreference mUse16bppAlphaPref;
+@@ -127,6 +131,13 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
              category.removePreference(findPreference(FORCE_HIGHEND_GFX_PREF));
          }
  
@@ -84,7 +83,7 @@ index 1251f7f..81629a7 100644
          /* Display the warning dialog */
          alertDialog = new AlertDialog.Builder(getActivity()).create();
          alertDialog.setTitle(R.string.performance_settings_warning_title);
-@@ -183,6 +195,10 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+@@ -170,6 +181,10 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
          } else if (preference == mForceHighEndGfx) {
              SystemProperties.set(FORCE_HIGHEND_GFX_PERSIST_PROP,
                      mForceHighEndGfx.isChecked() ? "true" : "false");
@@ -95,7 +94,7 @@ index 1251f7f..81629a7 100644
          } else {
              // If we didn't handle it, let preferences handle it.
              return super.onPreferenceTreeClick(preferenceScreen, preference);
-@@ -225,4 +241,13 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+@@ -209,4 +224,13 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
          mPerfProfilePref.setValue(mPowerManager.getPowerProfile());
          setCurrentPerfProfileSummary();
      }
