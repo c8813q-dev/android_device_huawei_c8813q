@@ -1,4 +1,4 @@
-From 289b382c604c30504abc4ccb155bdcf81393f65d Mon Sep 17 00:00:00 2001
+From 671315eda25a5153522c51ef8f8e5c20691ca969 Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@gmail.com>
 Date: Fri, 18 Jul 2014 17:42:15 +0800
 Subject: [PATCH] Revert "sf: Set view frame of each display using binder"
@@ -6,8 +6,8 @@ Subject: [PATCH] Revert "sf: Set view frame of each display using binder"
 This reverts commit 04b8813d25f8a4a5709238f9863b5cd76c3a3d6e.
 ---
  services/surfaceflinger/Android.mk         |    6 ------
- services/surfaceflinger/SurfaceFlinger.cpp |   22 +---------------------
- 2 files changed, 1 insertion(+), 27 deletions(-)
+ services/surfaceflinger/SurfaceFlinger.cpp |   23 +----------------------
+ 2 files changed, 1 insertion(+), 28 deletions(-)
 
 diff --git a/services/surfaceflinger/Android.mk b/services/surfaceflinger/Android.mk
 index 197a123..0bcc5ca 100644
@@ -30,7 +30,7 @@ index 197a123..0bcc5ca 100644
  endif
  
 diff --git a/services/surfaceflinger/SurfaceFlinger.cpp b/services/surfaceflinger/SurfaceFlinger.cpp
-index d26d3af..12608e6 100644
+index 4f7b549..c4b4ebd 100644
 --- a/services/surfaceflinger/SurfaceFlinger.cpp
 +++ b/services/surfaceflinger/SurfaceFlinger.cpp
 @@ -82,10 +82,6 @@
@@ -60,7 +60,7 @@ index d26d3af..12608e6 100644
                              }
                              else{
                                  char property[PROPERTY_VALUE_MAX];
-@@ -1533,21 +1526,8 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
+@@ -1533,22 +1526,8 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
                                  }
                                  disp->setProjection(panelOrientation,
                                          state.viewport, state.frame);
@@ -70,7 +70,8 @@ index d26d3af..12608e6 100644
 -#ifdef QCOM_B_FAMILY
 -                            // Set the view frame of each display only of its
 -                            // default orientation.
--                            if(orient == DisplayState::eOrientationDefault) {
+-                            if(orient == DisplayState::eOrientationDefault and
+-                                    state.frame.isValid()) {
 -                                qdutils::setViewFrame(disp->getHwcDisplayId(),
 -                                    state.frame.left, state.frame.top,
 -                                    state.frame.right, state.frame.bottom);
