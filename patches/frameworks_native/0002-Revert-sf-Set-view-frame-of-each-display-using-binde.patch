@@ -1,36 +1,32 @@
-From 671315eda25a5153522c51ef8f8e5c20691ca969 Mon Sep 17 00:00:00 2001
+From 851afd73d93026f3c1f673dcc1421094db266149 Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@gmail.com>
 Date: Fri, 18 Jul 2014 17:42:15 +0800
 Subject: [PATCH] Revert "sf: Set view frame of each display using binder"
 
 This reverts commit 04b8813d25f8a4a5709238f9863b5cd76c3a3d6e.
 ---
- services/surfaceflinger/Android.mk         |    6 ------
+ services/surfaceflinger/Android.mk         |    5 -----
  services/surfaceflinger/SurfaceFlinger.cpp |   23 +----------------------
- 2 files changed, 1 insertion(+), 28 deletions(-)
+ 2 files changed, 1 insertion(+), 27 deletions(-)
 
 diff --git a/services/surfaceflinger/Android.mk b/services/surfaceflinger/Android.mk
-index 197a123..0bcc5ca 100644
+index 29bfea2..12f95c7 100644
 --- a/services/surfaceflinger/Android.mk
 +++ b/services/surfaceflinger/Android.mk
-@@ -113,15 +113,9 @@ endif
- ifeq ($(TARGET_USES_QCOM_BSP), true)
- ifneq ($(TARGET_QCOM_DISPLAY_VARIANT),)
-     LOCAL_C_INCLUDES += hardware/qcom/display-$(TARGET_QCOM_DISPLAY_VARIANT)/libgralloc
--    LOCAL_C_INCLUDES += hardware/qcom/display-$(TARGET_QCOM_DISPLAY_VARIANT)/libqdutils
--    ifeq ($(TARGET_QCOM_DISPLAY_VARIANT),caf-new)
--        LOCAL_CFLAGS += -DQCOM_B_FAMILY
--    endif
- else
-     LOCAL_C_INCLUDES += hardware/qcom/display/$(TARGET_BOARD_PLATFORM)/libgralloc
--    LOCAL_C_INCLUDES += hardware/qcom/display/$(TARGET_BOARD_PLATFORM)/libqdutils
+@@ -117,11 +117,6 @@ else
+     PLATFORM := $(TARGET_BOARD_PLATFORM)
  endif
+     LOCAL_C_INCLUDES += $(call project-path-for,qcom-display)/$(PLATFORM)/libgralloc
+-    LOCAL_C_INCLUDES += $(call project-path-for,qcom-display)/$(PLATFORM)/libqdutils
+-ifeq ($(TARGET_QCOM_DISPLAY_VARIANT),caf-new)
+-    LOCAL_CFLAGS += -DQCOM_B_FAMILY
+-endif
 -    LOCAL_SHARED_LIBRARIES += libqdutils
      LOCAL_CFLAGS += -DQCOM_BSP
  endif
  
 diff --git a/services/surfaceflinger/SurfaceFlinger.cpp b/services/surfaceflinger/SurfaceFlinger.cpp
-index 4f7b549..c4b4ebd 100644
+index e7c4716..1e35783 100644
 --- a/services/surfaceflinger/SurfaceFlinger.cpp
 +++ b/services/surfaceflinger/SurfaceFlinger.cpp
 @@ -82,10 +82,6 @@
