@@ -68,12 +68,6 @@ PRODUCT_PACKAGES += \
     libqservice
 
 PRODUCT_PACKAGES += \
-    librs_jni \
-    LiveWallpapers \
-    LiveWallpapersPicker \
-    VisualizationWallpapers
-
-PRODUCT_PACKAGES += \
     libmm-omxcore \
     libOmxCore \
     libstagefrighthw \
@@ -81,8 +75,7 @@ PRODUCT_PACKAGES += \
     libdivxdrmdecrypt \
     libdashplayer \
     libOmxVdec \
-    libOmxVenc \
-    qcmediaplayer
+    libOmxVenc
 
 # stagefright cmdline tools
 PRODUCT_PACKAGES += \
@@ -99,13 +92,6 @@ PRODUCT_PACKAGES += \
     gps.msm7x27a \
     lights.msm7x27a
 
-# FM Radio
-PRODUCT_PACKAGES += \
-    qcom.fmradio \
-    libqcomfm_jni \
-    FM2 \
-    FMRecord
-
 PRODUCT_PACKAGES += \
     com.android.future.usb.accessory \
     hwmac \
@@ -113,9 +99,6 @@ PRODUCT_PACKAGES += \
     setup_fs \
     e2fsck \
     resize2fs
-
-PRODUCT_PACKAGES += \
-    Stk
 
 # Files
 PRODUCT_COPY_FILES += \
@@ -204,14 +187,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.vold.umsdirtyratio=50
 
 PRODUCT_PROPERTY_OVERRIDES += \
-    persist.webview.provider=classic
-
-PRODUCT_PROPERTY_OVERRIDES += \
     wifi.interface=eth0 \
     wifi.supplicant_scan_interval=60
-
-PRODUCT_PROPERTY_OVERRIDES += \
-    persist.sys.thermal.monitor=1
 
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full.mk)
 
