@@ -1,0 +1,2312 @@
+From e221b7e17bf4c7849ae8813c2ac5b8accc9b6550 Mon Sep 17 00:00:00 2001
+From: dianlujitao <dianlujitao@gmail.com>
+Date: Thu, 9 Oct 2014 22:04:29 +0800
+Subject: [PATCH] sdl: fix build error
+
+ HG changeset patch
+ User Azamat H. Hackimov <azamat.hackimov@gmail.com>
+ Date 1370184533 -21600
+ Branch SDL-1.2
+ Node ID 91ad7b43317a6387e115ecdf63a49137f47e42c8
+ Parent  f7fd5c3951b9ed922fdf696f7182e71b58a13268
+Fix compilation with libX11 >= 1.5.99.902.
+
+These changes fixes bug #1769 for SDL 1.2
+(http://bugzilla.libsdl.org/show_bug.cgi?id=1769).
+---
+ distrib/sdl-1.2.15/configure.in                |   11 +
+ distrib/sdl-1.2.15/include/SDL_config.h.in     |    1 +
+ distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h  |    4 +
+ e4c5d95ed37611acc6a186522315195b4ebfb9ef.patch | 2230 ++++++++++++++++++++++++
+ 4 files changed, 2246 insertions(+)
+ create mode 100644 e4c5d95ed37611acc6a186522315195b4ebfb9ef.patch
+
+diff --git a/distrib/sdl-1.2.15/configure.in b/distrib/sdl-1.2.15/configure.in
+index 08c8e1e..89c526d 100644
+--- a/distrib/sdl-1.2.15/configure.in
++++ b/distrib/sdl-1.2.15/configure.in
+@@ -1127,6 +1127,17 @@ AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for ful
+             if test x$definitely_enable_video_x11_xrandr = xyes; then
+                 AC_DEFINE(SDL_VIDEO_DRIVER_X11_XRANDR)
+             fi
++            AC_MSG_CHECKING(for const parameter to _XData32)
++            have_const_param_xdata32=no
++            AC_TRY_COMPILE([
++              #include <X11/Xlibint.h>
++              extern int _XData32(Display *dpy,register _Xconst long *data,unsigned len);
++            ],[
++            ],[
++            have_const_param_xdata32=yes
++            AC_DEFINE(SDL_VIDEO_DRIVER_X11_CONST_PARAM_XDATA32)
++            ])
++            AC_MSG_RESULT($have_const_param_xdata32)
+         fi
+     fi
+ }
+diff --git a/distrib/sdl-1.2.15/include/SDL_config.h.in b/distrib/sdl-1.2.15/include/SDL_config.h.in
+index 8bb1773..78ca747 100644
+--- a/distrib/sdl-1.2.15/include/SDL_config.h.in
++++ b/distrib/sdl-1.2.15/include/SDL_config.h.in
+@@ -282,6 +282,7 @@
+ #undef SDL_VIDEO_DRIVER_WINDIB
+ #undef SDL_VIDEO_DRIVER_WSCONS
+ #undef SDL_VIDEO_DRIVER_X11
++#undef SDL_VIDEO_DRIVER_X11_CONST_PARAM_XDATA32
+ #undef SDL_VIDEO_DRIVER_X11_DGAMOUSE
+ #undef SDL_VIDEO_DRIVER_X11_DYNAMIC
+ #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT
+diff --git a/distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h b/distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h
+index cec2621..bab7411 100644
+--- a/distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h
++++ b/distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h
+@@ -175,7 +175,11 @@ SDL_X11_SYM(Bool,XShmQueryExtension,(Display* a),(a),return)
+  */
+ #ifdef LONG64
+ SDL_X11_MODULE(IO_32BIT)
++#if SDL_VIDEO_DRIVER_X11_CONST_PARAM_XDATA32
+ SDL_X11_SYM(int,_XData32,(Display *dpy,register _Xconst long *data,unsigned len),(dpy,data,len),return)
++#else
++SDL_X11_SYM(int,_XData32,(Display *dpy,register long *data,unsigned len),(dpy,data,len),return)
++#endif
+ SDL_X11_SYM(void,_XRead32,(Display *dpy,register long *data,long len),(dpy,data,len),)
+ #endif
+ 
+diff --git a/e4c5d95ed37611acc6a186522315195b4ebfb9ef.patch b/e4c5d95ed37611acc6a186522315195b4ebfb9ef.patch
+new file mode 100644
+index 0000000..49a6ca7
+--- /dev/null
++++ b/e4c5d95ed37611acc6a186522315195b4ebfb9ef.patch
+@@ -0,0 +1,2230 @@
++From e4c5d95ed37611acc6a186522315195b4ebfb9ef Mon Sep 17 00:00:00 2001
++From: Jesse Hall <jessehall@google.com>
++Date: Mon, 9 Jul 2012 11:42:54 -0700
++Subject: [PATCH] Apply Android changes from sdl-1.2.12 to sdl-1.2.15
++
++These changes come from diffing Android's sdl-1.2.12 tree against a
++pure upstream sdl-1.2.12 tree, and then manually applying those
++differences to the sdl-1.2.15 tree.
++
++Change-Id: I05fa6e8004bb629fa2482f092b6ab127b7e51e73
++---
++ distrib/sdl-1.2.15/Makefile                        |  71 +++
++ distrib/sdl-1.2.15/Makefile.android                |  93 ++++
++ distrib/sdl-1.2.15/README.ANDROID                  |   9 +
++ distrib/sdl-1.2.15/android-configure.sh            | 553 +++++++++++++++++++++
++ distrib/sdl-1.2.15/include/SDL_syswm.h             |  12 +
++ distrib/sdl-1.2.15/include/SDL_video.h             |  30 ++
++ distrib/sdl-1.2.15/sdl-config.in                   |   5 +-
++ distrib/sdl-1.2.15/sources.make                    | 243 +++++++++
++ .../sdl-1.2.15/src/audio/macosx/SDL_coreaudio.h    |   1 +
++ distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.c |  73 ++-
++ distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.h |  10 +-
++ distrib/sdl-1.2.15/src/main/macosx/SDLMain.m       |  14 +
++ distrib/sdl-1.2.15/src/video/SDL_sysvideo.h        |  15 +
++ distrib/sdl-1.2.15/src/video/SDL_video.c           |  60 +++
++ .../sdl-1.2.15/src/video/Xext/Xxf86dga/XF86DGA.c   |  10 +-
++ .../sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.h  |   6 +
++ .../sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.m  |   8 +-
++ distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.h |   1 +
++ distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.m | 134 ++++-
++ distrib/sdl-1.2.15/src/video/windib/SDL_dibvideo.c | 176 +++++++
++ distrib/sdl-1.2.15/src/video/x11/SDL_x11dyn.c      |   1 +
++ distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h      |  10 +
++ distrib/sdl-1.2.15/src/video/x11/SDL_x11video.c    |  11 +-
++ distrib/sdl-1.2.15/src/video/x11/SDL_x11video.h    |   3 +
++ distrib/sdl-1.2.15/src/video/x11/SDL_x11wm.c       | 186 +++++++
++ distrib/sdl-1.2.15/src/video/x11/SDL_x11wm_c.h     |   6 +-
++ 26 files changed, 1700 insertions(+), 41 deletions(-)
++ create mode 100644 distrib/sdl-1.2.15/Makefile
++ create mode 100644 distrib/sdl-1.2.15/Makefile.android
++ create mode 100644 distrib/sdl-1.2.15/README.ANDROID
++ create mode 100755 distrib/sdl-1.2.15/android-configure.sh
++ create mode 100644 distrib/sdl-1.2.15/sources.make
++
++diff --git a/distrib/sdl-1.2.15/Makefile b/distrib/sdl-1.2.15/Makefile
++new file mode 100644
++index 0000000..477677b
++--- /dev/null
+++++ b/distrib/sdl-1.2.15/Makefile
++@@ -0,0 +1,71 @@
+++# Copyright (C) 2012 The Android Open Source Project
+++#
+++# Licensed under the Apache License, Version 2.0 (the "License");
+++# you may not use this file except in compliance with the License.
+++# You may obtain a copy of the License at
+++#
+++#      http://www.apache.org/licenses/LICENSE-2.0
+++#
+++# Unless required by applicable law or agreed to in writing, software
+++# distributed under the License is distributed on an "AS IS" BASIS,
+++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+++# See the License for the specific language governing permissions and
+++# limitations under the License.
+++#
+++
+++# this is a set of definitions that allow the usage of Makefile.android
+++# even if we're not using the Android build system.
+++#
+++
+++OBJS_DIR     := objs
+++CONFIG_MAKE  := $(OBJS_DIR)/config.make
+++CONFIG_H     := $(OBJS_DIR)/config-host.h
+++
+++ifeq ($(wildcard $(CONFIG_MAKE)),)
+++    $(error "The configuration file '$(CONFIG_MAKE)' doesnt' exist, please run the "android-configure.sh" script)
+++endif
+++
+++include $(CONFIG_MAKE)
+++
+++ifeq ($(strip $(BUILD_SYSTEM)),)
+++    $(error "The BUILD_SYSTEM variable was not defined by your configuration sub-makefile. Aborting")
+++endif
+++
+++include $(BUILD_SYSTEM)/definitions.make
+++
+++VPATH := $(OBJS_DIR)
+++VPATH += :$(SRC_PATH)/include
+++VPATH += :$(SRC_PATH)
+++
+++.PHONY: all libraries executables clean clean-config clean-objs-dir \
+++        clean-executables clean-libraries
+++
+++CLEAR_VARS                := $(BUILD_SYSTEM)/clear_vars.make
+++BUILD_HOST_EXECUTABLE     := $(BUILD_SYSTEM)/host_executable.make
+++BUILD_HOST_STATIC_LIBRARY := $(BUILD_SYSTEM)/host_static_library.make
+++
+++DEPENDENCY_DIRS :=
+++
+++all: libraries executables
+++EXECUTABLES :=
+++LIBRARIES   :=
+++
+++clean: clean-intermediates
+++
+++distclean: clean clean-config
+++
+++# let's roll
+++include Makefile.android
+++
+++libraries: $(LIBRARIES)
+++executables: $(EXECUTABLES)
+++
+++clean-intermediates:
+++	rm -rf $(OBJS_DIR)/intermediates $(EXECUTABLES) $(LIBRARIES)
+++
+++clean-config:
+++	rm -f $(CONFIG_MAKE) $(CONFIG_H)
+++
+++# include dependency information
+++DEPENDENCY_DIRS := $(sort $(DEPENDENCY_DIRS))
+++-include $(wildcard $(DEPENDENCY_DIRS:%=%/*.d))
++diff --git a/distrib/sdl-1.2.15/Makefile.android b/distrib/sdl-1.2.15/Makefile.android
++new file mode 100644
++index 0000000..2dfa7dd
++--- /dev/null
+++++ b/distrib/sdl-1.2.15/Makefile.android
++@@ -0,0 +1,93 @@
+++LOCAL_PATH:= $(call my-dir)
+++
+++SDL_DIR := $(LOCAL_PATH)
+++include $(SDL_DIR)/sources.make
+++
+++CONFIG_DIRS     := \
+++    $(LOCAL_PATH)/objs \
+++    $(LOCAL_PATH)/include \
+++    $(LOCAL_PATH) \
+++
+++CONFIG_INCLUDES := $(CONFIG_DIRS:%=-I%)
+++
+++MY_CC      := $(CC)
+++MY_LD      := $(LD)
+++MY_CFLAGS  := $(CFLAGS) $(CONFIG_INCLUDES)
+++MY_LDFLAGS := $(LDFLAGS)
+++
+++include $(CLEAR_VARS)
+++
+++LOCAL_NO_DEFAULT_COMPILER_FLAGS := true
+++LOCAL_CC                        := $(MY_CC)
+++LOCAL_CFLAGS                    := $(MY_CFLAGS) $(LOCAL_CFLAGS)
+++LOCAL_LDFLAGS                   := $(MY_LDFLAGS) $(LOCAL_LDFLAGS)
+++
+++LOCAL_MODULE := libSDL
+++
+++LOCAL_SRC_FILES := $(SDL_SOURCES)
+++
+++include $(BUILD_HOST_STATIC_LIBRARY)
+++
+++## Build libSDLmain
+++##
+++
+++include $(CLEAR_VARS)
+++
+++LOCAL_NO_DEFAULT_COMPILER_FLAGS := true
+++LOCAL_CC                        := $(MY_CC)
+++LOCAL_CFLAGS                    := $(MY_CFLAGS) $(LOCAL_CFLAGS)
+++LOCAL_LDFLAGS                   := $(MY_LDFLAGS) $(LOCAL_LDFLAGS)
+++
+++LOCAL_MODULE := libSDLmain
+++
+++LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
+++
+++include $(BUILD_HOST_STATIC_LIBRARY)
+++
+++# handle installation of generated files
+++#
+++
+++SDL_HEADERS := \
+++	SDL.h \
+++	SDL_active.h \
+++	SDL_audio.h \
+++	SDL_byteorder.h \
+++	SDL_cdrom.h \
+++	SDL_copying.h \
+++	SDL_cpuinfo.h \
+++	SDL_endian.h \
+++	SDL_error.h \
+++	SDL_events.h \
+++	SDL_getenv.h \
+++	SDL_joystick.h \
+++	SDL_keyboard.h \
+++	SDL_keysym.h \
+++	SDL_loadso.h \
+++	SDL_main.h \
+++	SDL_mouse.h \
+++	SDL_mutex.h \
+++	SDL_name.h \
+++	SDL_opengl.h \
+++	SDL_platform.h \
+++	SDL_quit.h \
+++	SDL_rwops.h \
+++	SDL_stdinc.h \
+++	SDL_syswm.h \
+++	SDL_thread.h \
+++	SDL_timer.h \
+++	SDL_types.h \
+++	SDL_version.h \
+++	SDL_video.h \
+++	begin_code.h \
+++	close_code.h \
+++
+++
+++$(foreach target,$(INSTALL_TARGETS),\
+++  $(eval $(call install-target,objs/sdl-config,$(target)/bin/sdl-config)) \
+++  $(eval $(call install-target,objs/SDL_config.h,$(target)/include/SDL/SDL_config.h)) \
+++  $(eval $(call install-target,objs/libs/libSDL.a,$(target)/libs/libSDL.a)) \
+++  $(eval $(call install-target,objs/libs/libSDLmain.a,$(target)/libs/libSDLmain.a)) \
+++  $(foreach header,$(SDL_HEADERS), \
+++    $(eval $(call install-target,include/$(header),$(target)/include/SDL/$(header))) \
+++  ) \
+++)
++diff --git a/distrib/sdl-1.2.15/README.ANDROID b/distrib/sdl-1.2.15/README.ANDROID
++new file mode 100644
++index 0000000..cc4fee2
++--- /dev/null
+++++ b/distrib/sdl-1.2.15/README.ANDROID
++@@ -0,0 +1,9 @@
+++This is a modified version of SDL 1.2.15 that is used by the Android QEMU
+++emulator. See the git history for modifications relative to upstream.
+++
+++To build it as a static library on Linux, OS X and Windows:
+++
+++./android-configure.sh  [--prefix=<path>]
+++make -j2
+++make install
+++
++diff --git a/distrib/sdl-1.2.15/android-configure.sh b/distrib/sdl-1.2.15/android-configure.sh
++new file mode 100755
++index 0000000..94ef732
++--- /dev/null
+++++ b/distrib/sdl-1.2.15/android-configure.sh
++@@ -0,0 +1,553 @@
+++#/bin/sh
+++#
+++# this script is used to rebuild SDL from sources in the current
+++# directory. It depends on the Android emulator build scripts
+++# that should normally be located in ../emulator/android/build
+++# but you can also use ANDROID_QEMU_PATH in your environment
+++# to point to the top of the Android emulator sources
+++#
+++#
+++
+++# first, let's see which system we're running this on
+++cd `dirname $0`
+++
+++# try to find the Android build directory automatically
+++if [ -z "$ANDROID_QEMU_PATH" ] ; then
+++    if [ -f ../../android/build/common.sh ] ; then
+++        ANDROID_QEMU_PATH=../..
+++    else
+++        echo "You must define ANDROID_QEMU_PATH in your environment to point"
+++        echo "to the directory containing the Android emulator's sources."
+++        exit 1
+++    fi
+++fi
+++
+++if [ ! -d $ANDROID_QEMU_PATH ] ; then
+++    echo "Your ANDROID_QEMU_PATH does not point to a valid directory."
+++    exit 1
+++fi
+++
+++if [ ! -f $ANDROID_QEMU_PATH/android/build/common.sh ] ; then
+++    echo "Your ANDROID_QEMU_PATH does not point to a directory that"
+++    echo "contains the Android emulator build scripts."
+++    exit 1
+++fi
+++
+++# source common functions definitions
+++. $ANDROID_QEMU_PATH/android/build/common.sh
+++
+++# Parse options
+++OPTION_TRY_64=no
+++OPTION_HELP=no
+++OPTION_TARGETS=
+++OPTION_FORCE_AUTODETECT=no
+++OPTION_NO_TIGER=no
+++
+++if [ -z "$CC" ] ; then
+++  CC=gcc
+++fi
+++
+++for opt do
+++  optarg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
+++  case "$opt" in
+++  --help|-h|-\?) OPTION_HELP=yes
+++  ;;
+++  --verbose)
+++    if [ "$VERBOSE" = "yes" ] ; then
+++        VERBOSE2=yes
+++    else
+++        VERBOSE=yes
+++    fi
+++  ;;
+++  --cc=*) CC="$optarg" ; HOSTCC=$CC
+++  ;;
+++  --try-64) OPTION_TRY_64=yes
+++  ;;
+++  --prefix=*) OPTION_TARGETS="$OPTION_TARGETS $optarg"
+++  ;;
+++  --force-autodetect) OPTION_FORCE_AUTODETECT=yes
+++  ;;
+++  --no-tiger) OPTION_NO_TIGER=yes
+++  ;;
+++  *)
+++    echo "unknown option '$opt', use --help"
+++    exit 1
+++  esac
+++done
+++
+++# Print the help message
+++#
+++if [ "$OPTION_HELP" = "yes" ] ; then
+++    cat << EOF
+++
+++Usage: rebuild.sh [options]
+++Options: [defaults in brackets after descriptions]
+++EOF
+++    echo "Standard options:"
+++    echo "  --help                   print this message"
+++    echo "  --cc=PATH                specify C compiler [$CC]"
+++    echo "  --try-64                 try to build a 64-bit executable (may crash)"
+++    echo "  --verbose                verbose configuration"
+++    echo "  --force-autodetect       force feature auto-detection"
+++    echo "  --no-tiger               do not generate Tiger-compatible binaries (OS X only)"
+++    echo ""
+++    exit 1
+++fi
+++
+++# we only support generating 32-bit binaris on 64-bit systems.
+++# And we may need to add a -Wa,--32 to CFLAGS to let the assembler
+++# generate 32-bit binaries on Linux x86_64.
+++#
+++if [ "$OPTION_TRY_64" != "yes" ] ; then
+++    force_32bit_binaries
+++fi
+++
+++# default target
+++if [ -z "$OPTION_TARGETS" ] ; then
+++  OPTION_TARGETS=out/$OS
+++fi
+++
+++# we can build SDL with Cygwin, so enable it
+++enable_cygwin
+++
+++setup_toolchain
+++
+++###
+++### Special compiler and linker flags
+++###
+++
+++case "$OS" in
+++    linux-*)
+++        BUILD_CFLAGS="-D_GNU_SOURCE=1 -fvisibility=hidden -DXTHREADS -D_REENTRANT"
+++        # prevent -fstack-protector or the generated binaries will not link
+++        BUILD_CFLAGS="$BUILD_CFLAGS -fno-stack-protector"
+++        ;;
+++    darwin-*)
+++        BUILD_CFLAGS="-D_GNU_SOURCE=1 -fvisibility=hidden -DTARGET_API_MAC_CARBON -DTARGET_API_MAC_OSX -D_THREAD_SAFE -force_cpusubtype_ALL -fpascal-strings"
+++        # detect the 10.4 SDK and use it automatically
+++        TIGER_SDK=/Developer/SDKs/MacOSX10.4u.sdk
+++        if [ ! -d $TIGER_SDK -a $OPTION_NO_TIGER = no ] ; then
+++            echo "Please install the 10.4 SDK at $TIGER_SDK to generate Tiger-compatible binaries."
+++            echo "If you don't want compatibility, use --no-tiger option instead."
+++            exit 1
+++        fi
+++        if [ -d $TIGER_SDK ] ; then
+++            TIGER_OPTS="-isysroot $TIGER_SDK -mmacosx-version-min=10.4"
+++            BUILD_CFLAGS="$BUILD_CFLAGS $TIGER_OPTS"
+++            BUILD_LDFLAGS="$BUILD_LDFLAGS $TIGER_OPTS -Wl,-syslibroot,$(TIGER_SDK)"
+++            echo "Using OS X 10.4 SDK to generate Tiger-compatible binaries."
+++        else
+++            echo "Warning: the generated binaries will not be compatible with Tiger."
+++        fi
+++        ;;
+++    windows)
+++        BUILD_CFLAGS="-D_GNU_SOURCE=1"
+++        ;;
+++    *)
+++        BUILD_CFLAGS=
+++esac
+++
+++# BUILD_CFLAGS are used to build SDL, but SDL_CFLAGS are used
+++# when clients want to use its facilities
+++#
+++case "$HOST_OS" in
+++    linux)
+++        SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT"
+++        SDL_STATIC_LIBS="-lm -ldl -lpthread -lrt"
+++        ;;
+++    darwin)
+++        SDL_CFLAGS="-D_GNU_SOURCE=1 -D_THREAD_SAFE"
+++        SDL_STATIC_LIBS="-Wl,-framework,OpenGL -Wl,-framework,Cocoa -Wl,-framework,QuickTime -Wl,-framework,ApplicationServices -Wl,-framework,Carbon -Wl,-framework,IOKit"
+++        ;;
+++    windows)
+++        SDL_CFLAGS="-D_GNU_SOURCE=1 -Dmain=SDL_main"
+++        SDL_STATIC_LIBS="-luser32 -lgdi32 -lwinmm"
+++        ;;
+++    *)
+++        SDL_CFLAGS=
+++        SDL_STATIC_LIBS=
+++esac
+++
+++DOLLAR="$"
+++SDL_STATIC_LIBS="$DOLLAR{libdir}/libSDLmain.a $DOLLAR{libdir}/libSDL.a $SDL_STATIC_LIBS"
+++
+++###
+++### Features probes
+++###
+++
+++CONFIG_LIBC=yes
+++
+++###
+++### Configuration files generation
+++###
+++
+++# create the objs directory that is going to contain all generated files
+++# including the configuration ones
+++#
+++mkdir -p objs
+++
+++config_add ()
+++{
+++    echo "$1" >> $config_h
+++}
+++
+++# used to add a macro define/undef line to the configuration
+++# $1: macro name
+++# $2: 1, 0, yes or no
+++# $3: optional log prefix
+++config_add_macro ()
+++{
+++    local logname
+++    logname="${3:-CfgMacro   }"
+++    case "$2" in
+++        0|no|false)
+++            config_add "/* #undef $1 */"
+++            log "$logname: $1=0"
+++            ;;
+++        1|yes|true)
+++            config_add "#define $1 1"
+++            log "$logname: $1=1"
+++            ;;
+++    esac
+++}
+++
+++# used to add host-os-specific driver macros to the config file
+++# $1 : driver prefix, e.g. DRIVERS_VIDEO
+++# $2 : macro prefix
+++# this will look for DRIVERS_VIDEO_${HOST_OS}, and, if it is not
+++# defined in DRIVERS_VIDEO_default
+++#
+++# then this will call 'config_add ${2}_${driver}' for each driver listed
+++#
+++config_add_driver_macros ()
+++{
+++    local  driver_list="`var_value ${1}_${HOST_OS}`"
+++    local  driver_name
+++    if [ -z "$driver_list" ] ; then
+++        driver_list="`var_value ${1}_default`"
+++    fi
+++    for driver_name in $driver_list; do
+++        config_add_macro "${2}_${driver_name}" yes
+++    done
+++}
+++
+++config_h=objs/SDL_config.h
+++
+++# a function used to check the availability of a given Standard C header
+++# $1 : header name, without the .h suffix nor enclosing brackets (e.g. 'memory' for <memory.h>)
+++# this will update the configuration with a relevant line
+++sdl_check_header ()
+++{
+++    local result
+++    local header
+++    local macro
+++    header="<$1.h>"
+++    macro=`to_uppercase $1`
+++    macro=`echo $macro | tr '/' '_'`
+++    feature_check_header result "$header"
+++    config_add_macro HAVE_${macro}_H $result "StdCHeader "
+++}
+++
+++# call sdl_check_header with a list of header names
+++sdl_check_headers ()
+++{
+++    for hh in $*; do
+++        sdl_check_header "$hh"
+++    done
+++}
+++
+++# a function used to check that a given function is available in the C library
+++# this will update the configuration with a relevant line
+++# $1: function name
+++# $2: optional, libraries to link against
+++#
+++sdl_check_func ()
+++{
+++    local result
+++    local funcname
+++    local macro
+++    funcname="$1"
+++    macro=`to_uppercase $1`
+++    rm -f $TMPC
+++    cat > $TMPC <<EOF
+++#undef $funcname
+++#define $funcname  _innocuous_$funcname
+++#include <assert.h>
+++#undef $funcname
+++
+++typedef void (*func_t)(void);
+++extern void $funcname(void);
+++func_t  _dummy = $funcname;
+++int   main(void)
+++{
+++    return _dummy == $funcname;
+++}
+++EOF
+++    EXTRA_LDFLAGS="$2"
+++    feature_check_link result
+++    config_add_macro HAVE_${macro} $result "StdCFunc   "
+++}
+++
+++# call sdl_check_func with a list of functions
+++sdl_check_funcs ()
+++{
+++    for ff in $*; do
+++        sdl_check_func "$ff"
+++    done
+++}
+++
+++# check endianess of the host platform
+++sdl_check_endianess ()
+++{
+++    cat > $TMPC <<EOF
+++    int  main(void)
+++    {
+++        union {
+++            unsigned short  v;
+++            unsigned char   b[2];
+++        } u;
+++
+++        u.v = 0x1234;
+++        return (u.b[0] == 0x12);
+++    }
+++EOF
+++    feature_run_exec test_e
+++    if [ "$test_e" = "1" ] ; then
+++        eval $1=4321
+++    else
+++        eval $1=1234
+++    fi
+++}
+++
+++
+++generate_SDL_config_h ()
+++{
+++    echo "/* This file was autogenerated by '$PROGNAME' - do not edit */" > $config_h
+++
+++    config_add "#ifndef _SDL_config_h"
+++    config_add "#define _SDL_config_h"
+++    config_add ""
+++    config_add "#include \"SDL_platform.h\""
+++    config_add ""
+++    
+++    # true for all architectures these days
+++    config_add_macro SDL_HAS_64BIT_TYPE  1
+++
+++    sdl_check_endianess ENDIANESS
+++    config_add "#define SDL_BYTEORDER $ENDIANESS"
+++    config_add ""
+++
+++    config_add_macro HAVE_LIBC $CONFIG_LIBC
+++
+++    config_add "#if HAVE_LIBC"
+++    config_add ""
+++    config_add "/* Useful headers */"
+++
+++    sdl_check_headers  alloca sys/types stdio
+++
+++    # just like configure - force it to 1
+++    config_add "#define STDC_HEADERS  1"
+++
+++    sdl_check_headers  stdlib stdarg malloc memory string strings inttypes stdint ctype math iconv signal altivec
+++
+++    config_add "/* C library functions */"
+++
+++    sdl_check_funcs  malloc calloc realloc free alloc
+++
+++    config_add "#ifndef _WIN32 /* Don't use on Windows */"
+++
+++    sdl_check_funcs  getenv putenv unsetenv
+++
+++    config_add "#endif"
+++    sdl_check_funcs qsort abs bcopy memset memcpy memmove memcmp strlen strlcpy strlcat
+++    sdl_check_funcs strdup _strrev _strupr _strlwr index rindex strchr strrchr itoa _ltoa
+++    sdl_check_funcs _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull
+++    sdl_check_funcs strtod atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp
+++    sdl_check_funcs vsnprintf iconv sigaction setjmp nanosleep
+++
+++    sdl_check_func clock_gettime -lrt
+++    sdl_check_func dlvsym -ldl
+++
+++    sdl_check_funcs getpagesize
+++
+++    config_add "#else"
+++    config_add "/* We may need some replacement for stdarg.h here */"
+++    config_add "#include <stdarg.h>"
+++    config_add "#endif /* HAVE_LIBC */"
+++    config_add ""
+++
+++    config_add "/* Allow disabling of core subsystems */"
+++
+++    config_add_macro SDL_AUDIO_DISABLED yes
+++    config_add_macro SDL_CDROM_DISABLED yes
+++    config_add_macro SDL_CPUINFO_DISABLED no
+++    config_add_macro SDL_EVENTS_DISABLED no
+++    config_add_macro SDL_FILE_DISABLED yes
+++    config_add_macro SDL_JOYSTICK_DISABLED yes
+++    config_add_macro SDL_LOADSO_DISABLED no
+++    config_add_macro SDL_THREADS_DISABLED no
+++    config_add_macro SDL_TIMERS_DISABLED no
+++    config_add_macro SDL_VIDEO_DISABLED no
+++
+++    config_add ""
+++    config_add "/* Enable various shared object loading systems */"
+++
+++    config_add_driver_macros DRIVERS_LOADSO SDL_LOADSO
+++
+++    config_add ""
+++    config_add "/* Enable various threading systems */"
+++
+++    config_add_driver_macros DRIVERS_THREAD SDL_THREAD
+++
+++    config_add ""
+++    config_add "/* Enable various timer systems */"
+++
+++    config_add_driver_macros DRIVERS_TIMER SDL_TIMER
+++
+++    config_add ""
+++    config_add "/* Enable various video drivers */"
+++
+++    config_add_driver_macros DRIVERS_VIDEO SDL_VIDEO_DRIVER
+++
+++    config_add_driver_macros DRIVERS_MAIN SDL_MAIN
+++
+++    # the following defines are good enough for all recent Unix distributions
+++    config_add "#define SDL_VIDEO_DRIVER_X11_DYNAMIC \"libX11.so.6\""
+++    config_add "#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT \"libXext.so.6\""
+++    config_add "#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR \"libXrandr.so.2\""
+++    config_add "#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER \"libXrender.so.1\""
+++
+++    # todo: OpenGL support ?
+++    # todo: Assembly routines support ?
+++
+++    config_add "#endif /* _SDL_config_h */"
+++}
+++
+++### Build the config sub-makefile
+++###
+++
+++make_add ()
+++{
+++    echo "$1" >> $config_mk
+++}
+++
+++make_add_driver_macros ()
+++{
+++    local driver_list="`var_value ${1}_${HOST_OS}`"
+++    local driver_name
+++    if [ -z "$driver_list" ] ; then
+++        driver_list="`var_value ${1}_default`"
+++    fi
+++    for driver_name in $driver_list; do
+++        make_add "SDL_$2_${driver_name} := yes"
+++    done
+++}
+++
+++generate_sdl_config_mk ()
+++{
+++    CFLAGS="$CFLAGS $BUILD_CFLAGS"
+++    LDFLAGS="$LDFLAGS $BUILD_LDFLAGS"
+++    create_config_mk
+++
+++    make_add ""
+++    PWD=`pwd`
+++    make_add "SRC_PATH=$PWD"
+++    make_add "BUILD_SYSTEM=$ANDROID_QEMU_PATH/android/build"
+++
+++    make_add "SDL_CONFIG_LIBC := $CONFIG_LIBC"
+++    make_add "SDL_CONFIG_CPUINFO := yes"
+++
+++    make_add_driver_macros DRIVERS_LOADSO CONFIG_LOADSO
+++    make_add_driver_macros DRIVERS_THREAD CONFIG_THREAD
+++    make_add_driver_macros DRIVERS_TIMER  CONFIG_TIMER
+++    make_add_driver_macros DRIVERS_VIDEO  CONFIG_VIDEO
+++
+++    make_add_driver_macros DRIVERS_MAIN   CONFIG_MAIN
+++
+++    make_add "INSTALL_TARGETS := $OPTION_TARGETS"
+++}
+++
+++### Build the final sdl-config script from the template
+++###
+++
+++generate_sdl_config ()
+++{
+++    # build a sed script that will replace all @VARIABLES@ in the template
+++    # with appropriate values
+++    rm -f $TMPC
+++
+++    # replace @exec_prefix@ with "{prefix}", and @libdir@ with "{libdir}"
+++    cat > $TMPC <<EOF
+++s!@exec_prefix@!\$\{prefix\}!g
+++s!@libdir@!\$\{exec_prefix\}/libs!g
+++s!@includedir@!\$\{prefix\}/include!g
+++EOF
+++
+++    # we want to enable static linking, do @ENABLE_STATIC_FALSE@ and @ENABLE_STATIC_TRUE@
+++    cat >> $TMPC <<EOF
+++s!@ENABLE_STATIC_FALSE@!\#!g
+++s!@ENABLE_STATIC_TRUE@!!g
+++s!@ENABLE_SHARED_TRUE@!\#!g
+++s!@ENABLE_SHARED_FALSE@!!g
+++EOF
+++
+++    # set the version to 1.2.15
+++    cat >> $TMPC <<EOF
+++s!@SDL_VERSION@!1.2.15!g
+++EOF
+++
+++    #
+++    cat >> $TMPC <<EOF
+++s!@SDL_CFLAGS@!$SDL_CFLAGS!g
+++s!@SDL_STATIC_LIBS@!$SDL_STATIC_LIBS!g
+++EOF
+++
+++    cat sdl-config.in | sed -f $TMPC > objs/sdl-config
+++    chmod +x objs/sdl-config
+++}
+++
+++# copy a configuration file or perform auto-detection if one is not available
+++# or the --force-autodetect option was used
+++# $1: basename of config file
+++# $2: command to run to perform auto-detection/generation
+++#
+++copy_or_autodetect ()
+++{
+++    if [ "$OPTION_FORCE_AUTODETECT" != "yes" -a -f android/build/$OS/$1 ] ; then
+++        log "Setup      : Copying $1 from android/build/$OS"
+++        cp -f android/build/$OS/$1 objs/$1
+++    else
+++        log "Setup      : Auto-generating $1"
+++        eval $2
+++    fi
+++}
+++
+++generate_all ()
+++{
+++  copy_or_autodetect SDL_config.h generate_SDL_config_h
+++  generate_sdl_config_mk
+++  copy_or_autodetect sdl-config generate_sdl_config
+++}
+++
+++DRIVERS_LOADSO_default=DLOPEN
+++DRIVERS_LOADSO_darwin=DLCOMPAT
+++DRIVERS_LOADSO_windows=WIN32
+++
+++# TODO: determine if PTHREAD_RECURSIVE or PTHREAD_RECURSIVE_NP is valid for the platform
+++DRIVERS_THREAD_default="PTHREAD PTHREAD_RECURSIVE_MUTEX"
+++DRIVERS_THREAD_linux="PTHREAD PTHREAD_RECURSIVE_MUTEX_NP"
+++DRIVERS_THREAD_windows=WIN32
+++
+++DRIVERS_TIMER_default=UNIX
+++DRIVERS_TIMER_windows=WIN32
+++
+++# TODO: actually compute this properly for X11 and dynamic loading !!
+++DRIVERS_VIDEO_default="X11 X11_DPMS X11_XINERAMA X11_XME"
+++DRIVERS_VIDEO_darwin="QUARTZ"
+++DRIVERS_VIDEO_windows="WINDIB"
+++
+++DRIVERS_MAIN_default=DUMMY
+++DRIVERS_MAIN_darwin=MACOSX
+++DRIVERS_MAIN_windows=WIN32
+++
+++generate_all
++diff --git a/distrib/sdl-1.2.15/include/SDL_syswm.h b/distrib/sdl-1.2.15/include/SDL_syswm.h
++index 78433c6..771d6b1 100644
++--- a/distrib/sdl-1.2.15/include/SDL_syswm.h
+++++ b/distrib/sdl-1.2.15/include/SDL_syswm.h
++@@ -181,6 +181,18 @@ typedef struct SDL_SysWMinfo {
++ 	int data;
++ } SDL_SysWMinfo;
++ 
+++#elif defined(SDL_VIDEO_DRIVER_QUARTZ)
+++
+++struct SDL_SysWMmsg {
+++	SDL_version version;
+++	int data;
+++};
+++
+++typedef struct SDL_SysWMinfo {
+++	SDL_version version;
+++	void* nsWindowPtr;
+++} SDL_SysWMinfo;
+++
++ #else
++ 
++ /** The generic custom event structure */
++diff --git a/distrib/sdl-1.2.15/include/SDL_video.h b/distrib/sdl-1.2.15/include/SDL_video.h
++index f9c4e07..9a2df0c 100644
++--- a/distrib/sdl-1.2.15/include/SDL_video.h
+++++ b/distrib/sdl-1.2.15/include/SDL_video.h
++@@ -936,6 +936,36 @@ typedef enum {
++  */
++ extern DECLSPEC SDL_GrabMode SDLCALL SDL_WM_GrabInput(SDL_GrabMode mode);
++ 
+++/*
+++ * Move the SDL Window to a specific position. Does nothing in fullscreen mode.
+++ */
+++extern DECLSPEC void SDL_WM_SetPos(int x, int y);
+++
+++/*
+++ * Get the current SDL window position. Returns (0,0) in fullscreen mode.
+++ */
+++extern DECLSPEC void SDL_WM_GetPos(int *px, int *py);
+++
+++/*
+++ * If the window is fully visible, return TRUE; otherwise, recenter the window
+++ * if the 'recenter' parameter is non-0, and return FALSE.
+++ */
+++extern DECLSPEC int SDL_WM_IsFullyVisible(int recenter);
+++
+++/*
+++ * Get the resolution of the main monitor in DPIs, if available.
+++ * Return 0 on success, or -1 if the data is not available.
+++ */
+++extern DECLSPEC int SDL_WM_GetMonitorDPI(int *xDPI, int *yDPI);
+++
+++/*
+++ * Get the coordinates of the monitor in virtual desktop space.
+++ * In the case of multi-monitor systems, returns the rectangle of
+++ * the 'nearest' monitor relative to the main SDL_window. Returns
+++ * 0 on success, or -1 if the data is not available.
+++ */
+++extern DECLSPEC int SDL_WM_GetMonitorRect(SDL_Rect *rect);
+++
++ /*@}*/
++ 
++ /** @internal Not in public API at the moment - do not use! */
++diff --git a/distrib/sdl-1.2.15/sdl-config.in b/distrib/sdl-1.2.15/sdl-config.in
++index e0fcc0c..843c1a6 100644
++--- a/distrib/sdl-1.2.15/sdl-config.in
+++++ b/distrib/sdl-1.2.15/sdl-config.in
++@@ -1,6 +1,7 @@
++ #!/bin/sh
++ 
++-prefix=@prefix@
+++curdir=`dirname $0`
+++prefix=`dirname $curdir`
++ exec_prefix=@exec_prefix@
++ exec_prefix_set=no
++ libdir=@libdir@
++@@ -49,7 +50,7 @@ while test $# -gt 0; do
++ @ENABLE_SHARED_TRUE@      ;;
++ @ENABLE_STATIC_TRUE@@ENABLE_SHARED_TRUE@    --static-libs)
++ @ENABLE_STATIC_TRUE@@ENABLE_SHARED_FALSE@    --libs|--static-libs)
++-@ENABLE_STATIC_TRUE@      echo -L@libdir@ @SDL_RLD_FLAGS@ @SDL_STATIC_LIBS@
+++@ENABLE_STATIC_TRUE@      echo @SDL_STATIC_LIBS@
++ @ENABLE_STATIC_TRUE@      ;;
++     *)
++       echo "${usage}" 1>&2
++diff --git a/distrib/sdl-1.2.15/sources.make b/distrib/sdl-1.2.15/sources.make
++new file mode 100644
++index 0000000..5117506
++--- /dev/null
+++++ b/distrib/sdl-1.2.15/sources.make
++@@ -0,0 +1,243 @@
+++# This is included from the main Android emulator build script
+++# to declare the SDL-related sources, compiler flags and libraries
+++#
+++
+++SDL_CFLAGS :=
+++SDL_LDLIBS :=
+++SDL_STATIC_LIBRARIES :=
+++
+++SDL_SOURCES :=
+++
+++ifeq ($(HOST_OS),linux)
+++    SDL_CONFIG_LOADSO_DLOPEN := yes
+++    SDL_CONFIG_THREAD_PTHREAD := yes
+++    SDL_CONFIG_THREAD_PTHREAD_RECURSIVE_MUTEX_NP := yes
+++    SDL_CONFIG_TIMER_UNIX := yes
+++    SDL_CONFIG_VIDEO_X11 := yes
+++    SDL_CONFIG_VIDEO_X11_DPMS := yes
+++    SDL_CONFIG_VIDEO_X11_XINERAMA := yes
+++    SDL_CONFIG_VIDEO_X11_XME := yes
+++    SDL_CONFIG_MAIN_DUMMY := yes
+++
+++    SDL_CFLAGS += -D_GNU_SOURCE=1 -D_REENTRANT
+++    SDL_LDLIBS += -lm -ldl -lpthread -lrt
+++endif
+++
+++ifeq ($(HOST_OS),freebsd)
+++    SDL_CONFIG_LOADSO_DLOPEN := yes
+++    SDL_CONFIG_THREAD_PTHREAD := yes
+++    SDL_CONFIG_THREAD_PTHREAD_RECURSIVE_MUTEX := yes
+++    SDL_CONFIG_TIMER_UNIX := yes
+++    SDL_CONFIG_VIDEO_X11 := yes
+++    SDL_CONFIG_VIDEO_X11_DPMS := yes
+++    SDL_CONFIG_VIDEO_X11_XINERAMA := yes
+++    SDL_CONFIG_VIDEO_X11_XME := yes
+++    SDL_CONFIG_MAIN_DUMMY := yes
+++
+++    SDL_CFLAGS += -D_GNU_SOURCE=1 -D_REENTRANT
+++    SDL_LDLIBS += -lm -ldl -lpthread
+++endif
+++
+++ifeq ($(HOST_OS),darwin)
+++    SDL_CONFIG_LOADSO_DLCOMPAT := yes
+++    SDL_CONFIG_THREAD_PTHREAD := yes
+++    SDL_CONFIG_THREAD_PTHREAD_RECURSIVE_MUTEX := yes
+++    SDL_CONFIG_TIMER_UNIX := yes
+++    SDL_CONFIG_VIDEO_QUARTZ := yes
+++    SDL_CONFIG_MAIN_MACOSX := yes
+++
+++    SDL_CFLAGS += -D_GNU_SOURCE=1 -DTHREAD_SAFE
+++    FRAMEWORKS := OpenGL Cocoa QuickTime ApplicationServices Carbon IOKit
+++    SDL_LDLIBS += $(FRAMEWORKS:%=-Wl,-framework,%)
+++endif
+++
+++ifeq ($(HOST_OS),windows)
+++    SDL_CONFIG_LOADSO_WIN32 := yes
+++    SDL_CONFIG_THREAD_WIN32 := yes
+++    SDL_CONFIG_TIMER_WIN32 := yes
+++    SDL_CONFIG_VIDEO_WINDIB := yes
+++    SDL_CONFIG_MAIN_WIN32 := yes
+++
+++    SDL_CFLAGS += -D_GNU_SOURCE=1 -Dmain=SDL_main -DNO_STDIO_REDIRECT=1
+++    SDL_LDLIBS += -luser32 -lgdi32 -lwinmm
+++endif
+++
+++
+++# the main src/ sources
+++#
+++SRCS := SDL.c \
+++        SDL_error.c \
+++        SDL_fatal.c \
+++
+++SRCS += events/SDL_active.c \
+++	events/SDL_events.c \
+++	events/SDL_expose.c \
+++	events/SDL_keyboard.c \
+++	events/SDL_mouse.c \
+++	events/SDL_quit.c \
+++	events/SDL_resize.c \
+++
+++SRCS += file/SDL_rwops.c
+++
+++SRCS += stdlib/SDL_getenv.c \
+++        stdlib/SDL_iconv.c \
+++        stdlib/SDL_malloc.c \
+++        stdlib/SDL_qsort.c \
+++        stdlib/SDL_stdlib.c \
+++        stdlib/SDL_string.c
+++
+++SRCS += cpuinfo/SDL_cpuinfo.c
+++
+++SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/%)
+++
+++# the LoadSO sources
+++#
+++
+++SRCS :=
+++
+++ifeq ($(SDL_CONFIG_LOADSO_DLOPEN),yes)
+++  SRCS += dlopen/SDL_sysloadso.c
+++  SDL_LDLIBS += -ldl
+++endif
+++
+++ifeq ($(SDL_CONFIG_LOADSO_DLCOMPAT),yes)
+++  SRCS += macosx/SDL_dlcompat.c
+++endif
+++
+++ifeq ($(SDL_CONFIG_LOADSO_WIN32),yes)
+++  SRCS += win32/SDL_sysloadso.c
+++endif
+++
+++SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/loadso/%)
+++
+++# the Thread sources
+++#
+++
+++SRCS := SDL_thread.c
+++
+++ifeq ($(SDL_CONFIG_THREAD_PTHREAD),yes)
+++  SRCS += pthread/SDL_syscond.c \
+++          pthread/SDL_sysmutex.c \
+++          pthread/SDL_syssem.c \
+++          pthread/SDL_systhread.c
+++endif
+++
+++ifeq ($(SDL_CONFIG_THREAD_WIN32),yes)
+++  SRCS += win32/SDL_sysmutex.c \
+++          win32/SDL_syssem.c \
+++          win32/SDL_systhread.c
+++endif
+++
+++SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/thread/%)
+++
+++# the Timer sources
+++#
+++
+++SRCS := SDL_timer.c
+++
+++ifeq ($(SDL_CONFIG_TIMER_UNIX),yes)
+++  SRCS += unix/SDL_systimer.c
+++endif
+++
+++ifeq ($(SDL_CONFIG_TIMER_WIN32),yes)
+++  SRCS += win32/SDL_systimer.c
+++endif
+++
+++SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/timer/%)
+++
+++# the Video sources
+++#
+++
+++SRCS := SDL_RLEaccel.c \
+++	SDL_blit.c \
+++	SDL_blit_0.c \
+++	SDL_blit_1.c \
+++	SDL_blit_A.c \
+++	SDL_blit_N.c \
+++	SDL_bmp.c \
+++	SDL_cursor.c \
+++	SDL_gamma.c \
+++	SDL_pixels.c \
+++	SDL_stretch.c \
+++	SDL_surface.c \
+++	SDL_video.c \
+++	SDL_yuv.c \
+++	SDL_yuv_mmx.c \
+++	SDL_yuv_sw.c \
+++
+++SRCS += dummy/SDL_nullevents.c \
+++        dummy/SDL_nullmouse.c \
+++        dummy/SDL_nullvideo.c
+++
+++ifeq ($(SDL_CONFIG_VIDEO_WINDIB),yes)
+++  SRCS += windib/SDL_dibevents.c \
+++          windib/SDL_dibvideo.c \
+++          wincommon/SDL_sysevents.c \
+++          wincommon/SDL_sysmouse.c \
+++          wincommon/SDL_syswm.c \
+++          wincommon/SDL_wingl.c
+++endif
+++
+++ifeq ($(SDL_CONFIG_VIDEO_QUARTZ),yes)
+++  SRCS += quartz/SDL_QuartzGL.m \
+++          quartz/SDL_QuartzVideo.m \
+++          quartz/SDL_QuartzWM.m \
+++          quartz/SDL_QuartzWindow.m \
+++          quartz/SDL_QuartzEvents.m \
+++          maccommon/SDL_macevents.c \
+++          maccommon/SDL_macgl.c \
+++          maccommon/SDL_macmouse.c \
+++          maccommon/SDL_macwm.c
+++
+++endif
+++
+++ifeq ($(SDL_CONFIG_VIDEO_X11),yes)
+++  SRCS += x11/SDL_x11dyn.c \
+++          x11/SDL_x11dga.c \
+++          x11/SDL_x11events.c \
+++          x11/SDL_x11gamma.c \
+++          x11/SDL_x11gl.c \
+++          x11/SDL_x11image.c \
+++          x11/SDL_x11modes.c \
+++          x11/SDL_x11mouse.c \
+++          x11/SDL_x11video.c \
+++          x11/SDL_x11wm.c \
+++          x11/SDL_x11yuv.c
+++endif
+++
+++ifeq ($(SDL_CONFIG_VIDEO_X11_DGAMOUSE),yes)
+++  SRCS += x11/SDL_x11dga.c
+++endif
+++
+++ifeq ($(SDL_CONFIG_VIDEO_X11_XME),yes)
+++  SRCS += Xext/XME/xme.c
+++endif
+++
+++ifeq ($(SDL_CONFIG_VIDEO_X11_XINERAMA),yes)
+++  SRCS += Xext/Xinerama/Xinerama.c
+++endif
+++
+++ifeq ($(SDL_CONFIG_VIDEO_X11_XV),yes)
+++  SRCS += Xext/Xv/Xv.c
+++endif
+++
+++SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/video/%)
+++
+++## Build libSDLmain
+++##
+++
+++SRCS :=
+++
+++ifeq ($(SDL_CONFIG_MAIN_DUMMY),yes)
+++  SRCS += dummy/SDL_dummy_main.c
+++endif
+++
+++ifeq ($(SDL_CONFIG_MAIN_MACOSX),yes)
+++  SRCS += macosx/SDLMain.m
+++endif
+++
+++ifeq ($(SDL_CONFIG_MAIN_WIN32),yes)
+++  SRCS += win32/SDL_win32_main.c
+++endif
+++
+++SDLMAIN_SOURCES := $(SRCS:%=$(SDL_DIR)/src/main/%)
++diff --git a/distrib/sdl-1.2.15/src/audio/macosx/SDL_coreaudio.h b/distrib/sdl-1.2.15/src/audio/macosx/SDL_coreaudio.h
++index c11bc03..3f0e218 100644
++--- a/distrib/sdl-1.2.15/src/audio/macosx/SDL_coreaudio.h
+++++ b/distrib/sdl-1.2.15/src/audio/macosx/SDL_coreaudio.h
++@@ -25,6 +25,7 @@
++ #define _SDL_coreaudio_h
++ 
++ #include "../SDL_sysaudio.h"
+++#include <AudioUnit/AUNTComponent.h>
++ 
++ /* Hidden "this" pointer for the video functions */
++ #define _THIS	SDL_AudioDevice *this
++diff --git a/distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.c b/distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.c
++index 51a9a4d..b218ff9 100644
++--- a/distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.c
+++++ b/distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.c
++@@ -45,6 +45,10 @@ static void DIB_PlayAudio(_THIS);
++ static void DIB_WaitDone(_THIS);
++ static void DIB_CloseAudio(_THIS);
++ 
+++int volatile dibaudio_thread_debug = 0;
+++int volatile dibaudio_cb_debug     = 0;
+++int volatile dibaudio_main_debug   = 0;
+++
++ /* Audio driver bootstrap functions */
++ 
++ static int Audio_Available(void)
++@@ -109,11 +113,13 @@ static void CALLBACK FillSound(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance,
++ 		return;
++ 
++ 	/* Signal that we are done playing a buffer */
++-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
++-	ReleaseSemaphoreCE(audio_sem, 1, NULL);
++-#else
++-	ReleaseSemaphore(audio_sem, 1, NULL);
++-#endif
+++	dibaudio_cb_debug = 1;
+++	EnterCriticalSection(&audio_cs);
+++	dibaudio_cb_debug = 2;
+++	SetEvent(audio_event);
+++	dibaudio_cb_debug = 3;
+++	LeaveCriticalSection(&audio_cs);
+++	dibaudio_cb_debug = 4;
++ }
++ 
++ static void SetMMerror(char *function, MMRESULT code)
++@@ -147,17 +153,20 @@ static void DIB_ThreadInit(_THIS)
++ void DIB_WaitAudio(_THIS)
++ {
++ 	/* Wait for an audio chunk to finish */
++-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
++-	WaitForSemaphoreCE(audio_sem, INFINITE);
++-#else
++-	WaitForSingleObject(audio_sem, INFINITE);
++-#endif
+++	dibaudio_thread_debug = 1;
+++	WaitForSingleObject(audio_event, INFINITE);
+++	dibaudio_thread_debug = 2;
+++	ResetEvent(audio_event);
+++	dibaudio_thread_debug = 3;
++ }
++ 
++ Uint8 *DIB_GetAudioBuf(_THIS)
++ {
++         Uint8 *retval;
++ 
+++    dibaudio_thread_debug = 4;
+++    EnterCriticalSection(&audio_cs);
+++    dibaudio_thread_debug = 5;
++ 	retval = (Uint8 *)(wavebuf[next_buffer].lpData);
++ 	return retval;
++ }
++@@ -165,14 +174,23 @@ Uint8 *DIB_GetAudioBuf(_THIS)
++ void DIB_PlayAudio(_THIS)
++ {
++ 	/* Queue it up */
+++	dibaudio_thread_debug = 6;
++ 	waveOutWrite(sound, &wavebuf[next_buffer], sizeof(wavebuf[0]));
+++	dibaudio_thread_debug = 7;
++ 	next_buffer = (next_buffer+1)%NUM_BUFFERS;
+++	LeaveCriticalSection(&audio_cs);
+++	dibaudio_thread_debug = 8;
++ }
++ 
++ void DIB_WaitDone(_THIS)
++ {
++-	int i, left;
+++	int i, left, tries = 5;
++ 
+++	dibaudio_thread_debug = 9;
+++
+++	/* give some time for the wave output to send the last buffer,
+++	   but don't hang if one was cancelled
+++	  */
++ 	do {
++ 		left = NUM_BUFFERS;
++ 		for ( i=0; i<NUM_BUFFERS; ++i ) {
++@@ -180,10 +198,13 @@ void DIB_WaitDone(_THIS)
++ 				--left;
++ 			}
++ 		}
++-		if ( left > 0 ) {
++-			SDL_Delay(100);
++-		}
++-	} while ( left > 0 );
+++		if ( left == 0 )
+++			break;
+++
+++		SDL_Delay(100);
+++	} while ( --tries > 0 );
+++
+++	dibaudio_thread_debug = 10;
++ }
++ 
++ void DIB_CloseAudio(_THIS)
++@@ -191,15 +212,15 @@ void DIB_CloseAudio(_THIS)
++ 	int i;
++ 
++ 	/* Close up audio */
++-	if ( audio_sem ) {
+++	if (audio_event != INVALID_HANDLE_VALUE ) {
++ #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
++-		CloseSynchHandle(audio_sem);
+++		CloseSynchHandle(audio_event);
++ #else
++-		CloseHandle(audio_sem);
+++		CloseHandle(audio_event);
++ #endif
++ 	}
++ 	if ( sound ) {
++-		waveOutClose(sound);
+++		waveOutReset(sound);
++ 	}
++ 
++ 	/* Clean up mixing buffers */
++@@ -215,6 +236,9 @@ void DIB_CloseAudio(_THIS)
++ 		SDL_free(mixbuf);
++ 		mixbuf = NULL;
++ 	}
+++
+++	if ( sound )
+++		waveOutClose(sound);
++ }
++ 
++ int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
++@@ -225,7 +249,8 @@ int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
++ 
++ 	/* Initialize the wavebuf structures for closing */
++ 	sound = NULL;
++-	audio_sem = NULL;
+++	InitializeCriticalSection(&audio_cs);
+++	audio_event = INVALID_HANDLE_VALUE;
++ 	for ( i = 0; i < NUM_BUFFERS; ++i )
++ 		wavebuf[i].dwUser = 0xFFFF;
++ 	mixbuf = NULL;
++@@ -287,12 +312,8 @@ int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
++ #endif
++ 
++ 	/* Create the audio buffer semaphore */
++-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
++-	audio_sem = CreateSemaphoreCE(NULL, NUM_BUFFERS-1, NUM_BUFFERS, NULL);
++-#else
++-	audio_sem = CreateSemaphore(NULL, NUM_BUFFERS-1, NUM_BUFFERS, NULL);
++-#endif
++-	if ( audio_sem == NULL ) {
+++	audio_event = CreateEvent( NULL, TRUE, FALSE, NULL );
+++	if (audio_event == NULL) {
++ 		SDL_SetError("Couldn't create semaphore");
++ 		return(-1);
++ 	}
++diff --git a/distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.h b/distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.h
++index d2c6228..16fd078 100644
++--- a/distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.h
+++++ b/distrib/sdl-1.2.15/src/audio/windib/SDL_dibaudio.h
++@@ -33,17 +33,21 @@
++ 
++ struct SDL_PrivateAudioData {
++ 	HWAVEOUT sound;
++-	HANDLE audio_sem;
++-	Uint8 *mixbuf;		/* The raw allocated mixing buffer */
+++    CRITICAL_SECTION audio_cs;
+++    HANDLE           audio_event;
+++	Uint8*           mixbuf;		/* The raw allocated mixing buffer */
++ 	WAVEHDR wavebuf[NUM_BUFFERS];	/* Wave audio fragments */
+++    int              cur_buffer;
++ 	int next_buffer;
++ };
++ 
++ /* Old variable names */
++ #define sound			(this->hidden->sound)
++-#define audio_sem 		(this->hidden->audio_sem)
+++#define audio_event     (this->hidden->audio_event)
+++#define audio_cs        (this->hidden->audio_cs)
++ #define mixbuf			(this->hidden->mixbuf)
++ #define wavebuf			(this->hidden->wavebuf)
+++#define cur_buffer      (this->hidden->cur_buffer)
++ #define next_buffer		(this->hidden->next_buffer)
++ 
++ #endif /* _SDL_lowaudio_h */
++diff --git a/distrib/sdl-1.2.15/src/main/macosx/SDLMain.m b/distrib/sdl-1.2.15/src/main/macosx/SDLMain.m
++index 2434f81..7da74b6 100644
++--- a/distrib/sdl-1.2.15/src/main/macosx/SDLMain.m
+++++ b/distrib/sdl-1.2.15/src/main/macosx/SDLMain.m
++@@ -371,6 +371,20 @@ int main (int argc, char **argv)
++         gFinderLaunch = NO;
++     }
++ 
+++/* ANDROID_BEGIN */
+++    /* if -no-window is used, we don't want to launch a graphical
+++     * application that creates a Menu bar and steals the focus.
+++     */
+++    {
+++        int nn;
+++        for (nn = 0; nn < argc; nn++) {
+++            if ( !strcmp( argv[nn], "-no-window" ) ) {
+++                return SDL_main (argc, argv);
+++            }
+++        }
+++    }
+++/* ANDROID_END */
+++
++ #if SDL_USE_NIB_FILE
++     NSApplicationMain (argc, argv);
++ #else
++diff --git a/distrib/sdl-1.2.15/src/video/SDL_sysvideo.h b/distrib/sdl-1.2.15/src/video/SDL_sysvideo.h
++index 436450e..65287b4 100644
++--- a/distrib/sdl-1.2.15/src/video/SDL_sysvideo.h
+++++ b/distrib/sdl-1.2.15/src/video/SDL_sysvideo.h
++@@ -217,6 +217,21 @@ struct SDL_VideoDevice {
++ 	/* Get some platform dependent window information */
++ 	int (*GetWMInfo)(_THIS, SDL_SysWMinfo *info);
++ 
+++	/* set window position */
+++	void (*SetWindowPos)(_THIS, int x, int y);
+++
+++	/* get window position */
+++	void (*GetWindowPos)(_THIS, int *px, int *py);
+++
+++	/* determine if the window is fully visible on screen */
+++	int (*IsWindowVisible)(_THIS, int recenter);
+++
+++	/* get main monitor's resolution */
+++	int (*GetMonitorDPI)(_THIS, int *xdpi, int *ydpi);
+++
+++	/* get nearest monitor's rectangle */
+++	int (*GetMonitorRect)(_THIS, SDL_Rect* rect);
+++
++ 	/* * * */
++ 	/* Cursor manager functions */
++ 
++diff --git a/distrib/sdl-1.2.15/src/video/SDL_video.c b/distrib/sdl-1.2.15/src/video/SDL_video.c
++index 46285c9..43c1826 100644
++--- a/distrib/sdl-1.2.15/src/video/SDL_video.c
+++++ b/distrib/sdl-1.2.15/src/video/SDL_video.c
++@@ -1963,6 +1963,66 @@ int SDL_WM_ToggleFullScreen(SDL_Surface *surface)
++ }
++ 
++ /*
+++ *  Set window position
+++ */
+++void  SDL_WM_SetPos(int  x, int  y)
+++{
+++    SDL_VideoDevice*  video = current_video;
+++
+++    if (video && video->SetWindowPos)
+++        video->SetWindowPos(video, x, y);
+++}
+++
+++/*
+++ * Get window position
+++ */
+++void  SDL_WM_GetPos(int  *px, int  *py)
+++{
+++    SDL_VideoDevice*  video = current_video;
+++
+++    if (video && video->GetWindowPos)
+++        video->GetWindowPos(video, px, py);
+++    else {
+++        *px = 100;
+++        *py = 100;
+++    }
+++}
+++
+++int   SDL_WM_IsFullyVisible( int  recenter )
+++{
+++    int  result = 1;
+++
+++    SDL_VideoDevice*  video = current_video;
+++
+++    if (video && video->IsWindowVisible) {
+++        result = video->IsWindowVisible(video, recenter);
+++    }
+++    return result;
+++}
+++
+++int   SDL_WM_GetMonitorDPI( int  *xDpi, int  *yDpi )
+++{
+++    int               result = -1;
+++    SDL_VideoDevice*  video  = current_video;
+++
+++    if (video && video->GetMonitorDPI) {
+++        result = video->GetMonitorDPI(video, xDpi, yDpi);
+++    }
+++    return result;
+++}
+++
+++int   SDL_WM_GetMonitorRect( SDL_Rect  *rect )
+++{
+++    int               result = -1;
+++    SDL_VideoDevice*  video  = current_video;
+++
+++    if (video && video->GetMonitorRect) {
+++        result = video->GetMonitorRect(video, rect);
+++    }
+++    return result;
+++}
+++
+++/*
++  * Get some platform dependent window manager information
++  */
++ int SDL_GetWMInfo (SDL_SysWMinfo *info)
++diff --git a/distrib/sdl-1.2.15/src/video/Xext/Xxf86dga/XF86DGA.c b/distrib/sdl-1.2.15/src/video/Xext/Xxf86dga/XF86DGA.c
++index fc729f1..f2210e4 100644
++--- a/distrib/sdl-1.2.15/src/video/Xext/Xxf86dga/XF86DGA.c
+++++ b/distrib/sdl-1.2.15/src/video/Xext/Xxf86dga/XF86DGA.c
++@@ -605,10 +605,10 @@ SDL_NAME(XF86DGAForkApp)(int screen)
++ 	    SDL_NAME(XF86DGADirectVideoLL)(sp->display, sp->screen, 0);
++ 	    XSync(sp->display, False);
++ 	}
++-        if (WIFEXITED(status))
++-	    _exit(0);
+++    if (WIFEXITED(status))
+++	    exit(0);
++ 	else
++-	    _exit(-1);
+++	    exit(-1);
++     }
++     return pid;
++ }
++@@ -657,7 +657,7 @@ XF86cleanup(int sig)
++     static char beenhere = 0;
++ 
++     if (beenhere)
++-	_exit(3);
+++	    exit(3);
++     beenhere = 1;
++ 
++     for (i = 0; i < numScrs; i++) {
++@@ -665,7 +665,7 @@ XF86cleanup(int sig)
++ 	SDL_NAME(XF86DGADirectVideo)(sp->display, sp->screen, 0);
++ 	XSync(sp->display, False);
++     }
++-    _exit(3);
+++    exit(3);
++ }
++ 
++ Bool
++diff --git a/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.h b/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.h
++index 7506e0c..d00e496 100644
++--- a/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.h
+++++ b/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.h
++@@ -215,6 +215,12 @@ void         QZ_PumpEvents       (_THIS);
++ void         QZ_SetCaption       (_THIS, const char *title, const char *icon);
++ void         QZ_SetIcon          (_THIS, SDL_Surface *icon, Uint8 *mask);
++ int          QZ_IconifyWindow    (_THIS);
+++void         QZ_SetWindowPos     (_THIS, int x, int y);
+++void         QZ_GetWindowPos     (_THIS, int *px, int *py);
+++int          QZ_IsWindowVisible  (_THIS, int recenter);
+++int          QZ_GetMonitorDPI    (_THIS, int *xDpi, int *yDpi);
+++int          QZ_GetMonitorRect   (_THIS, SDL_Rect *rect);
+++
++ SDL_GrabMode QZ_GrabInput        (_THIS, SDL_GrabMode grab_mode);
++ /*int          QZ_GetWMInfo        (_THIS, SDL_SysWMinfo *info);*/
++ 
++diff --git a/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.m b/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.m
++index fa04e9d..bb20172 100644
++--- a/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.m
+++++ b/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzVideo.m
++@@ -23,6 +23,7 @@
++ 
++ #include "SDL_QuartzVideo.h"
++ #include "SDL_QuartzWindow.h"
+++#include "SDL_QuartzWM.h"
++ 
++ /* These APIs aren't just deprecated; they're gone from the headers in the
++    10.7 SDK. If we're using a >= 10.7 SDK, but targeting < 10.7, then we
++@@ -220,7 +221,12 @@ static int QZ_Available ()
++     device->SetCaption    = QZ_SetCaption;
++     device->SetIcon       = QZ_SetIcon;
++     device->IconifyWindow = QZ_IconifyWindow;
++-    /*device->GetWMInfo     = QZ_GetWMInfo;*/
+++    device->SetWindowPos  = QZ_SetWindowPos;
+++    device->GetWindowPos  = QZ_GetWindowPos;
+++    device->IsWindowVisible = QZ_IsWindowVisible;
+++    device->GetMonitorDPI = QZ_GetMonitorDPI;
+++    device->GetMonitorRect = QZ_GetMonitorRect;
+++    device->GetWMInfo     = QZ_GetWMInfo;
++     device->GrabInput     = QZ_GrabInput;
++ 
++     /*
++diff --git a/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.h b/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.h
++index 0b0767e..5219a59 100644
++--- a/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.h
+++++ b/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.h
++@@ -25,3 +25,4 @@ struct WMcursor {
++ };
++ 
++ void QZ_UpdateCursor(_THIS);
+++int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info);
++diff --git a/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.m b/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.m
++index d526424..b40abf8 100644
++--- a/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.m
+++++ b/distrib/sdl-1.2.15/src/video/quartz/SDL_QuartzWM.m
++@@ -278,6 +278,137 @@ void QZ_SetCaption    (_THIS, const char *title, const char *icon) {
++     }
++ }
++ 
+++void QZ_SetWindowPos (_THIS, int  x, int  y)
+++{
+++    if ( qz_window == nil ) {
+++        //printf( "%s(%d,%d): called for NULL window\n", __FUNCTION__, x, y ); 
+++        return;
+++    }
+++     
+++    [ qz_window setFrameTopLeftPoint:NSMakePoint( x, this->hidden->height - y ) ];
+++    //printf( "%s(%d,%d): done\n", __FUNCTION__, x, y );
+++}
+++
+++void  QZ_GetWindowPos(_THIS, int  *px, int  *py)
+++{
+++    NSPoint  pt;
+++    
+++    *px = *py = 0;
+++ 
+++    if ( qz_window == NULL ) {
+++        //printf( "%s: called on NULL window\n", __FUNCTION__ );
+++    }
+++
+++    if ( qz_window != nil ) {
+++        NSRect  rect = [ qz_window frame ];
+++        *px = rect.origin.x;
+++        *py = this->hidden->height - rect.origin.y - rect.size.height;
+++        //printf( "%s: returning (%d,%d)\n", __FUNCTION__, *px, *py );
+++    }
+++}
+++
+++/* determine if the window is fully visible on the current screen configuration */
+++int  QZ_IsWindowVisible(_THIS, int  recenter)
+++{
+++    int  result = 0;
+++   
+++    //printf( "... enter %s\n", __FUNCTION__ );
+++
+++    if ( qz_window != NULL ) {
+++        NSRect        frame   = [ qz_window frame ]; 
+++        NSArray*      screens = [ NSScreen screens ];
+++        unsigned int  count   = [ screens count ];
+++        unsigned int  n;
+++        //printf( "window frame (%d,%d) (%d,%d)\n", frame.origin.x, frame.origin.y,
+++        //        frame.size.width, frame.size.height );
+++        for (n = 0; n < count; n++) {
+++            NSScreen*  screen = [ screens objectAtIndex: n ];
+++            NSRect     vis    = [ screen visibleFrame ];
+++   
+++            //printf( "screen %d/%d  frame (%d,%d) (%d,%d)\n", n+1, count,
+++            //        vis.origin.x, vis.origin.y, vis.size.width, vis.size.height );
+++
+++            if (frame.origin.x >= vis.origin.x && 
+++                frame.origin.x + frame.size.width <= vis.origin.x + vis.size.width &&
+++                frame.origin.y >= vis.origin.y &&
+++                frame.origin.y + frame.size.height <= vis.origin.y + vis.size.height )
+++            {
+++                result = 1;
+++                break;
+++            }
+++        }
+++    }
+++    //printf ( "... exit %s, result = %d\n", __FUNCTION__, result );
+++    if ( !result && recenter ) {
+++        [ qz_window center ] ;
+++    }
+++    return result;
+++}
+++
+++int QZ_GetMonitorDPI(_THIS, int  *xDpi, int *yDpi)
+++{
+++    /* FIXME: how to get this information from Cocoa ? */
+++    return -1;
+++}
+++
+++int QZ_GetMonitorRect   (_THIS, SDL_Rect  *rect)
+++{
+++    NSWindow*     window = qz_window;
+++    NSRect        frame   = [ window frame ];
+++    int           fx1     = frame.origin.x;
+++    int           fy1     = frame.origin.y;
+++    int           fx2     = frame.size.width + fx1;
+++    int           fy2     = frame.size.height + fy1; 
+++    NSArray*      screens = [ NSScreen screens ];
+++    unsigned int  count   = [ screens count ];
+++    int           bestScreen = -1;
+++    int           bestArea = 0;
+++
+++    unsigned int  n;
+++
+++    /* we need to compute which screen has the most window pixels */
+++    for (n = 0; n < count; n++) {
+++        NSScreen*  screen = [ screens objectAtIndex: n ];
+++        NSRect     vis    = [ screen visibleFrame ];
+++        int        vx1    = vis.origin.x;
+++        int        vy1    = vis.origin.y;
+++        int        vx2    = vis.size.width + vx1;
+++        int        vy2    = vis.size.height + vy1;
+++        int        cx1, cx2, cy1, cy2, cArea;
+++
+++        if (fx1 >= vx2 || vx1 >= fx2 || fy1 >= vy2 || vy1 >= fy2)
+++            continue;
+++
+++        cx1 = (fx1 < vx1) ? vx1 : fx1;
+++        cx2 = (fx2 > vx2) ? vx2 : fx2;
+++        cy1 = (fy1 < vy1) ? vy1 : fy1;
+++        cy2 = (fy2 > vy2) ? vy2 : fy2;
+++
+++        if (cx1 >= cx2 || cy1 >= cy2)
+++            continue;
+++
+++        cArea = (cx2-cx1)*(cy2-cy1);
+++
+++        if (bestScreen < 0 || cArea > bestArea) {
+++            bestScreen = n;
+++            bestArea   = cArea;
+++        }
+++    }
+++    if (bestScreen < 0)
+++        bestScreen = 0;
+++
+++    {
+++        NSScreen*  screen = [ screens objectAtIndex: bestScreen ];
+++        NSRect     vis    = [ screen visibleFrame ];
+++
+++        rect->x = vis.origin.x;
+++        rect->y = vis.origin.y;
+++        rect->w = vis.size.width;
+++        rect->h = vis.size.height; 
+++    }
+++    return 0;
+++}
+++
++ void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
++ {
++     NSBitmapImageRep *imgrep;
++@@ -362,11 +493,10 @@ int  QZ_IconifyWindow (_THIS) {
++     }
++ }
++ 
++-/*
++ int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info) { 
++     info->nsWindowPtr = qz_window;
++     return 0; 
++-}*/
+++}
++ 
++ void QZ_ChangeGrabState (_THIS, int action) {
++ 
++diff --git a/distrib/sdl-1.2.15/src/video/windib/SDL_dibvideo.c b/distrib/sdl-1.2.15/src/video/windib/SDL_dibvideo.c
++index 6187bfc..9f1ffff 100644
++--- a/distrib/sdl-1.2.15/src/video/windib/SDL_dibvideo.c
+++++ b/distrib/sdl-1.2.15/src/video/windib/SDL_dibvideo.c
++@@ -115,6 +115,12 @@ static void DIB_RealizePalette(_THIS);
++ static void DIB_PaletteChanged(_THIS, HWND window);
++ static void DIB_WinPAINT(_THIS, HDC hdc);
++ 
+++static void DIB_GetWinPos(_THIS, int* px, int *py);
+++static void DIB_SetWinPos(_THIS, int  x, int  y);
+++static int  DIB_IsWinVisible(_THIS, int recenter);
+++static int  DIB_GetMonitorDPI(_THIS, int* xDpi, int *yDpi);
+++static int  DIB_GetMonitorRect(_THIS, SDL_Rect*  rect);
+++
++ /* helper fn */
++ static int DIB_SussScreenDepth();
++ 
++@@ -212,6 +218,12 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
++ 	device->InitOSKeymap = DIB_InitOSKeymap;
++ 	device->PumpEvents = DIB_PumpEvents;
++ 
+++	device->GetWindowPos = DIB_GetWinPos;
+++	device->SetWindowPos = DIB_SetWinPos;
+++	device->IsWindowVisible = DIB_IsWinVisible;
+++	device->GetMonitorDPI = DIB_GetMonitorDPI;
+++	device->GetMonitorRect = DIB_GetMonitorRect;
+++
++ 	/* Set up the windows message handling functions */
++ 	WIN_Activate = DIB_Activate;
++ 	WIN_RealizePalette = DIB_RealizePalette;
++@@ -1314,6 +1326,170 @@ static void DIB_WinPAINT(_THIS, HDC hdc)
++ 	DeleteDC(mdc);
++ }
++ 
+++static void DIB_GetWinPos(_THIS, int* px, int *py)
+++{
+++	RECT  rect;
+++	GetWindowRect(SDL_Window, &rect);
+++	*px = rect.left;
+++	*py = rect.top;
+++}
+++
+++static void DIB_SetWinPos(_THIS, int  x, int  y)
+++{
+++    SetWindowPos(SDL_Window, HWND_TOPMOST, 
+++                 x, y, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
+++}
+++
+++typedef struct {
+++    int   result;
+++    int   first;
+++    RECT  wrect;
+++    RECT  primary;
+++} VisibilityData;
+++
+++
+++BOOL CALLBACK visibility_cb(HMONITOR  hMonitor,
+++                            HDC       hdcMonitor,
+++                            LPRECT    mrect,
+++                            LPARAM    dwData)
+++{
+++    VisibilityData*  data = (VisibilityData*)dwData;
+++    
+++    if ( data->first ) {
+++        data->first   = 0;
+++        data->primary = mrect[0];
+++    }
+++    
+++    if ( data->wrect.left   >= mrect->left   &&
+++         data->wrect.right  <= mrect->right  &&
+++         data->wrect.top    >= mrect->top    &&
+++         data->wrect.bottom <= mrect->bottom )
+++    {
+++        data->result = 1;
+++        return FALSE;
+++    }
+++    return TRUE;
+++}
+++
+++static int  DIB_IsWinVisible(_THIS, int  recenter)
+++{
+++    VisibilityData  data;
+++    data.result = 0;
+++    data.first  = 1;
+++    
+++    GetWindowRect(SDL_Window, &data.wrect);
+++
+++    EnumDisplayMonitors(NULL, NULL, visibility_cb, (LPARAM)&data);
+++    
+++    if ( !data.result && recenter ) {
+++        int  new_x = 10;
+++        int  new_y = 10;
+++
+++        if ( !data.first ) {
+++            int  primary_w = data.primary.right  - data.primary.left;
+++            int  primary_h = data.primary.bottom - data.primary.top;
+++
+++            new_x = data.primary.left + (primary_w - this->screen->w)/2;
+++            new_y = data.primary.top  + (primary_h - this->screen->h)/2;
+++        }
+++        DIB_SetWinPos(this, new_x, new_y);
+++    }
+++    return  data.result;
+++}
+++
+++static int  DIB_GetMonitorDPI(_THIS, int* xDpi, int *yDpi)
+++{
+++    HDC  displayDC = CreateDC( "DISPLAY", NULL, NULL, NULL );
+++    int  xdpi, ydpi;
+++
+++    if (displayDC == NULL) {
+++        return -1;
+++    }
+++    xdpi = GetDeviceCaps( displayDC, LOGPIXELSX );
+++    ydpi = GetDeviceCaps( displayDC, LOGPIXELSY );
+++
+++    DeleteDC(displayDC);
+++
+++    /* sanity checks */
+++    if (xdpi < 20 || xdpi > 400 || ydpi < 20 || ydpi > 400) {
+++        return -1;
+++    }
+++
+++    *xDpi = xdpi;
+++    *yDpi = ydpi;
+++    return 0;
+++}
+++
+++
+++typedef struct {
+++    int   first;
+++    RECT  wrect;
+++	long  bestArea;
+++	RECT  bestRect;
+++	RECT  primary;
+++} ProximityData;
+++
+++BOOL CALLBACK proximity_cb(HMONITOR  hMonitor,
+++                           HDC       hdcMonitor,
+++                           LPRECT    mrect,
+++                           LPARAM    dwData)
+++{
+++    ProximityData*  data = (ProximityData*)dwData;
+++    int   x1, y1, x2, y2, area;
+++	
+++	x1 = mrect->left;
+++	x2 = mrect->right;
+++	y1 = mrect->top;
+++	y2 = mrect->bottom;
+++
+++	if (data->first) {
+++		data->primary = mrect[0];
+++	}
+++	
+++	if (x1 < data->wrect.left)
+++		x1 = data->wrect.left;
+++    if (x2 > data->wrect.right)
+++		x2 = data->wrect.right;
+++	if (y1 < data->wrect.top)
+++		y1 = data->wrect.top;
+++	if (y2 > data->wrect.bottom)
+++		y2 = data->wrect.bottom;
+++	
+++	if (x1 >= x2 || y1 >= y2)
+++		return TRUE;
+++
+++	area = (x2-x1)*(y2-y1);
+++	if (data->first || area > data->bestArea) {
+++		data->first    = 0;
+++		data->bestRect = mrect[0];
+++		data->bestArea = area;
+++	}
+++    return TRUE;
+++}
+++
+++static int  DIB_GetMonitorRect(_THIS, SDL_Rect*  rect)
+++{
+++    ProximityData  data;
+++	RECT*          sr;
+++
+++    data.first  = 1;
+++    GetWindowRect(SDL_Window, &data.wrect);
+++
+++    EnumDisplayMonitors(NULL, NULL, proximity_cb, (LPARAM)&data);
+++
+++	if (data.first)
+++		return -1;
+++
+++	sr = &data.bestRect;
+++
+++	rect->x = sr->left;
+++	rect->y = sr->top;
+++	rect->w = sr->right - sr->left;
+++	rect->h = sr->bottom - sr->top;
+++	
+++	return 0;
+++}
+++
++ /* Stub in case DirectX isn't available */
++ #if !SDL_AUDIO_DRIVER_DSOUND
++ void DX5_SoundFocus(HWND hwnd)
++diff --git a/distrib/sdl-1.2.15/src/video/x11/SDL_x11dyn.c b/distrib/sdl-1.2.15/src/video/x11/SDL_x11dyn.c
++index 7058add..7d4acbb 100644
++--- a/distrib/sdl-1.2.15/src/video/x11/SDL_x11dyn.c
+++++ b/distrib/sdl-1.2.15/src/video/x11/SDL_x11dyn.c
++@@ -200,6 +200,7 @@ int SDL_X11_LoadSymbols(void)
++ 
++ 		if (SDL_X11_HAVE_BASEXLIB) {  /* all required symbols loaded. */
++ 			SDL_ClearError();
+++			XInitThreads();
++ 		} else {
++ 			SDL_X11_UnloadSymbols();  /* in case something got loaded... */
++ 			rc = 0;
++diff --git a/distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h b/distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h
++index 4875b98..f9c7df3 100644
++--- a/distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h
+++++ b/distrib/sdl-1.2.15/src/video/x11/SDL_x11sym.h
++@@ -31,6 +31,7 @@ SDL_X11_SYM(int,XChangeWindowAttributes,(Display* a,Window b,unsigned long c,XSe
++ SDL_X11_SYM(Bool,XCheckTypedEvent,(Display* a,int b,XEvent* c),(a,b,c),return)
++ SDL_X11_SYM(int,XClearWindow,(Display* a,Window b),(a,b),return)
++ SDL_X11_SYM(int,XCloseDisplay,(Display* a),(a),return)
+++SDL_X11_SYM(int,XConfigureWindow,(Display* a,Window b,unsigned int c,XWindowChanges* d),(a,b,c,d),return)
++ SDL_X11_SYM(Colormap,XCreateColormap,(Display* a,Window b,Visual* c,int d),(a,b,c,d),return)
++ SDL_X11_SYM(Cursor,XCreatePixmapCursor,(Display* a,Pixmap b,Pixmap c,XColor* d,XColor* e,unsigned int f,unsigned int g),(a,b,c,d,e,f,g),return)
++ SDL_X11_SYM(GC,XCreateGC,(Display* a,Drawable b,unsigned long c,XGCValues* d),(a,b,c,d),return)
++@@ -39,6 +40,11 @@ SDL_X11_SYM(Pixmap,XCreatePixmap,(Display* a,Drawable b,unsigned int c,unsigned
++ SDL_X11_SYM(Pixmap,XCreatePixmapFromBitmapData,(Display* a,Drawable b,char* c,unsigned int d,unsigned int e,unsigned long f,unsigned long g,unsigned int h),(a,b,c,d,e,f,g,h),return)
++ SDL_X11_SYM(Window,XCreateSimpleWindow,(Display* a,Window b,int c,int d,unsigned int e,unsigned int f,unsigned int g,unsigned long h,unsigned long i),(a,b,c,d,e,f,g,h,i),return)
++ SDL_X11_SYM(Window,XCreateWindow,(Display* a,Window b,int c,int d,unsigned int e,unsigned int f,unsigned int g,int h,unsigned int i,Visual* j,unsigned long k,XSetWindowAttributes* l),(a,b,c,d,e,f,g,h,i,j,k,l),return)
+++SDL_X11_SYM(int,XDefaultScreen,(Display* a),(a),return)
+++SDL_X11_SYM(int,XDisplayWidth,(Display* a,int b),(a,b),return)
+++SDL_X11_SYM(int,XDisplayWidthMM,(Display* a, int b),(a, b),return)
+++SDL_X11_SYM(int,XDisplayHeight,(Display* a,int b),(a,b),return)
+++SDL_X11_SYM(int,XDisplayHeightMM,(Display* a, int b),(a, b),return)
++ SDL_X11_SYM(int,XDefineCursor,(Display* a,Window b,Cursor c),(a,b,c),return)
++ SDL_X11_SYM(int,XDeleteProperty,(Display* a,Window b,Atom c),(a,b,c),return)
++ SDL_X11_SYM(int,XDestroyWindow,(Display* a,Window b),(a,b),return)
++@@ -54,6 +60,7 @@ SDL_X11_SYM(int,XFreeGC,(Display* a,GC b),(a,b),return)
++ SDL_X11_SYM(int,XFreeModifiermap,(XModifierKeymap* a),(a),return)
++ SDL_X11_SYM(int,XFreePixmap,(Display* a,Pixmap b),(a,b),return)
++ SDL_X11_SYM(int,XGetErrorDatabaseText,(Display* a,_Xconst char* b,_Xconst char* c,_Xconst char* d,char* e,int f),(a,b,c,d,e,f),return)
+++SDL_X11_SYM(int,XGetGeometry,(Display* a,Drawable b,Window* c,int* d,int* e,unsigned int* f,unsigned int* g,unsigned int* h,unsigned int* i),(a,b,c,d,e,f,g,h,i),return)
++ SDL_X11_SYM(XModifierKeymap*,XGetModifierMapping,(Display* a),(a),return)
++ SDL_X11_SYM(int,XGetPointerControl,(Display* a,int* b,int* c,int* d),(a,b,c,d),return)
++ SDL_X11_SYM(XVisualInfo*,XGetVisualInfo,(Display* a,long b,XVisualInfo* c,int* d),(a,b,c,d),return)
++@@ -62,6 +69,7 @@ SDL_X11_SYM(Status,XGetWindowAttributes,(Display* a,Window b,XWindowAttributes*
++ SDL_X11_SYM(int,XGrabKeyboard,(Display* a,Window b,Bool c,int d,int e,Time f),(a,b,c,d,e,f),return)
++ SDL_X11_SYM(int,XGrabPointer,(Display* a,Window b,Bool c,unsigned int d,int e,int f,Window g,Cursor h,Time i),(a,b,c,d,e,f,g,h,i),return)
++ SDL_X11_SYM(Status,XIconifyWindow,(Display* a,Window b,int c),(a,b,c),return)
+++SDL_X11_SYM(Status,XInitThreads,(void),(),return)
++ SDL_X11_SYM(int,XInstallColormap,(Display* a,Colormap b),(a,b),return)
++ SDL_X11_SYM(KeyCode,XKeysymToKeycode,(Display* a,KeySym b),(a,b),return)
++ SDL_X11_SYM(Atom,XInternAtom,(Display* a,_Xconst char* b,Bool c),(a,b,c),return)
++@@ -82,6 +90,7 @@ SDL_X11_SYM(int,XPutImage,(Display* a,Drawable b,GC c,XImage* d,int e,int f,int
++ SDL_X11_SYM(int,XQueryColors,(Display* a,Colormap b,XColor* c,int d),(a,b,c,d),return)
++ SDL_X11_SYM(int,XQueryKeymap,(Display* a,char *b),(a,b),return)
++ SDL_X11_SYM(Bool,XQueryPointer,(Display* a,Window b,Window* c,Window* d,int* e,int* f,int* g,int* h,unsigned int* i),(a,b,c,d,e,f,g,h,i),return)
+++SDL_X11_SYM(int,XQueryTree,(Display* a,Window b,Window* c,Window* d,Window** e,unsigned int* f),(a,b,c,d,e,f),return)
++ SDL_X11_SYM(int,XRaiseWindow,(Display* a,Window b),(a,b),return)
++ SDL_X11_SYM(int,XReparentWindow,(Display* a,Window b,Window c,int d,int e),(a,b,c,d,e),return)
++ SDL_X11_SYM(int,XResetScreenSaver,(Display* a),(a),return)
++@@ -124,6 +133,7 @@ SDL_X11_SYM(void,_XSend,(Display* a,_Xconst char* b,long c),(a,b,c),)
++ SDL_X11_SYM(Status,_XReply,(Display* a,xReply* b,int c,Bool d),(a,b,c,d),return)
++ SDL_X11_SYM(unsigned long,_XSetLastRequestRead,(Display* a,xGenericReply* b),(a,b),return)
++ SDL_X11_SYM(SDL_X11_XSynchronizeRetType,XSynchronize,(Display* a,Bool b),(a,b),return)
+++SDL_X11_SYM(int,XTranslateCoordinates,(Display* a,Window b,Window c,int d,int e,int* f,int* g,Window* h),(a,b,c,d,e,f,g,h),return)
++ SDL_X11_SYM(SDL_X11_XESetWireToEventRetType,XESetWireToEvent,(Display* a,int b,SDL_X11_XESetWireToEventRetType c),(a,b,c),return)
++ SDL_X11_SYM(SDL_X11_XESetEventToWireRetType,XESetEventToWire,(Display* a,int b,SDL_X11_XESetEventToWireRetType c),(a,b,c),return)
++ SDL_X11_SYM(XExtensionErrorHandler,XSetExtensionErrorHandler,(XExtensionErrorHandler a),(a),return)
++diff --git a/distrib/sdl-1.2.15/src/video/x11/SDL_x11video.c b/distrib/sdl-1.2.15/src/video/x11/SDL_x11video.c
++index f7d8073..6d24422 100644
++--- a/distrib/sdl-1.2.15/src/video/x11/SDL_x11video.c
+++++ b/distrib/sdl-1.2.15/src/video/x11/SDL_x11video.c
++@@ -68,6 +68,8 @@ static int X11_SetColors(_THIS, int firstcolor, int ncolors,
++ static int X11_SetGammaRamp(_THIS, Uint16 *ramp);
++ static void X11_VideoQuit(_THIS);
++ 
+++int  X11_wmXAdjust;
+++int  X11_wmYAdjust;
++ 
++ /* X11 driver bootstrap functions */
++ 
++@@ -164,6 +166,11 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
++ 		device->SetIcon = X11_SetIcon;
++ 		device->IconifyWindow = X11_IconifyWindow;
++ 		device->GrabInput = X11_GrabInput;
+++		device->GetWindowPos = X11_GetWindowPos;
+++		device->SetWindowPos = X11_SetWindowPos;
+++		device->IsWindowVisible = X11_IsWindowVisible;
+++		device->GetMonitorDPI = X11_GetMonitorDPI;
+++		device->GetMonitorRect = X11_GetMonitorRect;
++ 		device->GetWMInfo = X11_GetWMInfo;
++ 		device->FreeWMCursor = X11_FreeWMCursor;
++ 		device->CreateWMCursor = X11_CreateWMCursor;
++@@ -350,7 +357,9 @@ static void create_aux_windows(_THIS)
++     xattr.colormap = SDL_XColorMap;
++ 
++     FSwindow = XCreateWindow(SDL_Display, SDL_Root,
++-                             x, y, 32, 32, 0,
+++                             x + X11_wmXAdjust,
+++                             y + X11_wmYAdjust,
+++                             32, 32, 0,
++ 			     this->hidden->depth, InputOutput, SDL_Visual,
++ 			     CWOverrideRedirect | CWBackPixel | CWBorderPixel
++ 			     | CWColormap,
++diff --git a/distrib/sdl-1.2.15/src/video/x11/SDL_x11video.h b/distrib/sdl-1.2.15/src/video/x11/SDL_x11video.h
++index f347560..18cf497 100644
++--- a/distrib/sdl-1.2.15/src/video/x11/SDL_x11video.h
+++++ b/distrib/sdl-1.2.15/src/video/x11/SDL_x11video.h
++@@ -156,6 +156,9 @@ struct SDL_PrivateVideoData {
++     int allow_screensaver;
++ };
++ 
+++extern int X11_wmXAdjust;
+++extern int X11_wmYAdjust;
+++
++ /* Old variable names */
++ #define local_X11		(this->hidden->local_X11)
++ #define SDL_Display		(this->hidden->X11_Display)
++diff --git a/distrib/sdl-1.2.15/src/video/x11/SDL_x11wm.c b/distrib/sdl-1.2.15/src/video/x11/SDL_x11wm.c
++index 14c816b..2fd59e9 100644
++--- a/distrib/sdl-1.2.15/src/video/x11/SDL_x11wm.c
+++++ b/distrib/sdl-1.2.15/src/video/x11/SDL_x11wm.c
++@@ -325,6 +325,147 @@ int X11_IconifyWindow(_THIS)
++ 	return(result);
++ }
++ 
+++#if 0
+++#define  D(...)  printf(__VA_ARGS__)
+++#define  E(...)  D(__VA_ARGS__)
+++#else
+++#define  D(...)  ((void)0)
+++#define  E(...)  ((void)0)
+++#endif
+++
+++static void  set_window_pos_nolock(_THIS, int x, int y)
+++{
+++    int          xNew, yNew;
+++    Window       child;
+++    int          xAdjust = X11_wmXAdjust;
+++    int          yAdjust = X11_wmYAdjust;
+++
+++    /* don't do anything in full-screen mode, because the FSwindow is used
+++     * instead of the WMwindow, which will make the adjustment go wild
+++     */
+++    if (this->screen->flags & SDL_FULLSCREEN)
+++        return;
+++
+++    /* this code is tricky because some window managers, but not all,
+++     * will translate the final window position by a given offset
+++     * corresponding to the frame decoration.
+++     *
+++     * so we first try to move the window, get the position that the
+++     * window manager has set, and if they are different, re-position the
+++     * window again with an adjustment.
+++     *
+++     * this causes a slight flicker since the window 'jumps' very
+++     * quickly from one position to the other.
+++     */
+++
+++    D("%s: move to [%d,%d] adjusted to [%d,%d]\n", __FUNCTION__,
+++      x, y, x+xAdjust, y+yAdjust);
+++    XMoveWindow(SDL_Display, WMwindow, x + xAdjust, y + yAdjust);
+++    XSync(SDL_Display, True);
+++    XTranslateCoordinates( SDL_Display, WMwindow, SDL_Root, 0, 0, &xNew, &yNew, &child );
+++    if (xNew != x || yNew != y) {
+++        X11_wmXAdjust = xAdjust = x - xNew;
+++        X11_wmYAdjust = yAdjust = y - yNew;
+++        D("%s: read pos [%d,%d], recomputing adjust=[%d,%d] moving to [%d,%d]\n",
+++          __FUNCTION__, xNew, yNew, xAdjust, yAdjust, x+xAdjust, y+yAdjust);
+++        XMoveWindow(SDL_Display, WMwindow, x + xAdjust, y + yAdjust );
+++    }
+++    XSync(SDL_Display, False);
+++}
+++
+++/* Set window position */
+++void  X11_SetWindowPos(_THIS, int  x, int  y)
+++{
+++    SDL_Lock_EventThread();
+++    set_window_pos_nolock(this, x, y);
+++    SDL_Unlock_EventThread();
+++}
+++
+++/* Get window position */
+++void  X11_GetWindowPos(_THIS, int  *px, int  *py)
+++{
+++    /* in full-screen mode, you can't move the window */
+++    if (this->screen->flags & SDL_FULLSCREEN) {
+++        *px = *py = 0;
+++        return;
+++    }
+++
+++
+++    SDL_Lock_EventThread();
+++    {
+++        Window  child;
+++
+++        XTranslateCoordinates( SDL_Display, WMwindow, SDL_Root, 0, 0, px, py, &child );
+++    }
+++    SDL_Unlock_EventThread();
+++}
+++
+++static int
+++is_window_visible(_THIS, int  screen_x, int  screen_y, int  screen_w, int  screen_h )
+++{
+++    XWindowAttributes   attr;
+++    int                 x, y;
+++    Window              child;
+++
+++    XGetWindowAttributes( SDL_Display, WMwindow, &attr );
+++    XTranslateCoordinates( SDL_Display, WMwindow, SDL_Root, 0, 0, &x, &y, &child );
+++
+++    return ( x >= screen_x && x + attr.width  <= screen_x + screen_w  &&
+++             y >= screen_y && y + attr.height <= screen_y + screen_h );
+++}
+++
+++int  X11_IsWindowVisible(_THIS, int  recenter)
+++{
+++    int                 result = 0;
+++    XWindowAttributes   attr;
+++    int                 screen_w, screen_h;
+++
+++    SDL_Lock_EventThread();
+++    XGetWindowAttributes( SDL_Display, SDL_Root, &attr );
+++    screen_w = attr.width;
+++    screen_h = attr.height;
+++
+++#if SDL_VIDEO_DRIVER_X11_XINERAMA
+++    if (use_xinerama) {
+++        SDL_NAME(XineramaScreenInfo) *xinerama;
+++        int                           i, screens;
+++
+++        xinerama = SDL_NAME(XineramaQueryScreens)(SDL_Display, &screens);
+++        for (i = 0; i < screens; i++) {
+++            if ( is_window_visible( this,
+++                                    xinerama[i].x_org, xinerama[i].y_org,
+++                                    xinerama[i].width, xinerama[i].height ) )
+++            {
+++                result = 1;
+++                break;
+++            }
+++        }
+++
+++        if ( !result && recenter ) {
+++            set_window_pos_nolock(this,
+++                              xinerama[0].x_org + (xinerama[0].width  - this->screen->w)/2,
+++                              xinerama[0].y_org + (xinerama[0].height - this->screen->h)/2 );
+++        }
+++        XFree(xinerama);
+++        goto Exit;
+++    }
+++#endif
+++    if ( is_window_visible( this, 0, 0, screen_w, screen_h ) ) {
+++        result = 1;
+++    }
+++
+++    if ( !result && recenter ) {
+++        set_window_pos_nolock( this,
+++                          (screen_w - this->screen->w)/2,
+++                          (screen_h - this->screen->h)/2 );
+++    }
+++#ifdef SDL_VIDEO_DRIVER_X11_XINERAMA
+++Exit:
+++#endif
+++    SDL_Unlock_EventThread();
+++    return result;
+++}
+++
++ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
++ {
++ 	int result;
++@@ -387,6 +528,51 @@ SDL_GrabMode X11_GrabInput(_THIS, SDL_GrabMode mode)
++ 	return(mode);
++ }
++ 
+++#define  MM_PER_INCH  25.4
+++
+++int
+++X11_GetMonitorDPI(_THIS, int  *px_dpi, int *py_dpi)
+++{
+++    Display*      display = SDL_Display;
+++    int           screen  = XDefaultScreen(display);
+++    int           xdpi, ydpi;
+++
+++    int  width     = XDisplayWidth(display, screen);
+++    int  width_mm  = XDisplayWidthMM(display, screen);
+++    int  height    = XDisplayHeight(display, screen);
+++    int  height_mm = XDisplayHeightMM(display, screen);
+++
+++    if (width_mm <= 0 || height_mm <= 0) {
+++        return -1;
+++    }
+++
+++    xdpi = (int)(width  * MM_PER_INCH / width_mm + 0.5);
+++    ydpi = (int)(height * MM_PER_INCH / height_mm + 0.5);
+++
+++    if (xdpi < 20 || xdpi > 400 || ydpi < 20 || ydpi > 400) {
+++        return -1;
+++    }
+++
+++    *px_dpi = xdpi;
+++    *py_dpi = ydpi;
+++
+++    return 0;
+++}
+++
+++int
+++X11_GetMonitorRect(_THIS, SDL_Rect *rect)
+++{
+++    Display*  display = SDL_Display;
+++    int       screen  = XDefaultScreen(display);
+++
+++    rect->x = 0;
+++    rect->y = 0;
+++    rect->w = XDisplayWidth(display, screen);
+++    rect->h = XDisplayHeight(display, screen);
+++
+++    return 0;
+++}
+++
++ /* If 'info' is the right version, this function fills it and returns 1.
++    Otherwise, in case of a version mismatch, it returns -1.
++ */
++diff --git a/distrib/sdl-1.2.15/src/video/x11/SDL_x11wm_c.h b/distrib/sdl-1.2.15/src/video/x11/SDL_x11wm_c.h
++index f85477b..c0f938b 100644
++--- a/distrib/sdl-1.2.15/src/video/x11/SDL_x11wm_c.h
+++++ b/distrib/sdl-1.2.15/src/video/x11/SDL_x11wm_c.h
++@@ -31,4 +31,8 @@ extern int X11_IconifyWindow(_THIS);
++ extern SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode);
++ extern SDL_GrabMode X11_GrabInput(_THIS, SDL_GrabMode mode);
++ extern int X11_GetWMInfo(_THIS, SDL_SysWMinfo *info);
++-
+++extern void  X11_GetWindowPos(_THIS, int  *px, int  *py);
+++extern void  X11_SetWindowPos(_THIS, int  x, int  y);
+++extern int   X11_IsWindowVisible(_THIS, int  recenter);
+++extern int X11_GetMonitorDPI(_THIS, int* xdpi, int *ydpi);
+++extern int X11_GetMonitorRect(_THIS, SDL_Rect *rect);
+-- 
+1.7.9.5
+
