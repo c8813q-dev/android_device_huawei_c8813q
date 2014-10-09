@@ -1,19 +1,19 @@
-From 4644181d6371b9dad8c991b2104f5a18e9870e7d Mon Sep 17 00:00:00 2001
+From 49ff760704589bcee7e4c6943ab79cecd5d7248a Mon Sep 17 00:00:00 2001
 From: Daz Jones <yuki@thebronasium.com>
 Date: Sat, 27 Jul 2013 02:40:36 +0100
 Subject: [PATCH] wifi: add support for custom Wi-Fi implementations
 
 Change-Id: Id464138cdb679fc4550914a32d9c71131bdfffb3
 ---
- wifi/Android.mk | 8 +++++++-
+ wifi/Android.mk |    8 +++++++-
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/wifi/Android.mk b/wifi/Android.mk
-index 51afe3a..788520f 100644
+index cde99d7..2cfcc16 100644
 --- a/wifi/Android.mk
 +++ b/wifi/Android.mk
-@@ -43,7 +43,13 @@ ifdef WIFI_EXT_MODULE_NAME
- LOCAL_CFLAGS += -DWIFI_EXT_MODULE_NAME=\"$(WIFI_EXT_MODULE_NAME)\"
+@@ -25,6 +25,12 @@ ifdef WIFI_DRIVER_FW_PATH_PARAM
+ LOCAL_CFLAGS += -DWIFI_DRIVER_FW_PATH_PARAM=\"$(WIFI_DRIVER_FW_PATH_PARAM)\"
  endif
  
 -LOCAL_SRC_FILES += wifi/wifi.c
@@ -25,8 +25,7 @@ index 51afe3a..788520f 100644
 +               $(TARGET_CUSTOM_WIFI)
 +endif
  
- ifeq ($(BOARD_HAVE_SAMSUNG_WIFI),true)
- LOCAL_CFLAGS += -DSAMSUNG_WIFI
+ LOCAL_SHARED_LIBRARIES += libnetutils
 -- 
-1.8.1.2
+1.7.9.5
 
