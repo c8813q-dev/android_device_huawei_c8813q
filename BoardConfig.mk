@@ -85,7 +85,7 @@ BOARD_KERNEL_BASE := 0x00200000
 BOARD_KERNEL_CMDLINE := androidboot.hardware=huawei androidboot.selinux=permissive
 BOARD_PAGE_SIZE := 2048
 TARGET_KERNEL_SOURCE := kernel/huawei/c8813q
-TARGET_KERNEL_CONFIG := c8813q_defconfig
+TARGET_KERNEL_CONFIG := c8813q_utouch_defconfig
 
 # Lights
 TARGET_PROVIDES_LIBLIGHT := true
