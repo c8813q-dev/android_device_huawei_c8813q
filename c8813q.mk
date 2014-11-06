@@ -188,7 +188,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     debug.composition.type=dyn \
     debug.hwc.dynThreshold=1.9 \
-    ro.bq.gpu_to_cpu_unsupported=1 \
     ro.max.fling_velocity=4000 \
     ro.opengles.version=131072 \
     ro.sf.lcd_density=240
@@ -218,7 +217,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.sys.thermal.monitor=1
 
 PRODUCT_PROPERTY_OVERRIDES += \
-    debug.gralloc.map_fb_memory=1
+    debug.gralloc.map_fb_memory=1 \
+    persist.hwc.mdpcomp.enable=false \
+    debug.mdpcomp.logs=0 \
+    debug.hwc.fakevsync=1
 
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full.mk)
 
