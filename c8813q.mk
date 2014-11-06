@@ -95,6 +95,11 @@ PRODUCT_PACKAGES += \
     codec \
     muxer
 
+# Camera
+PRODUCT_PACKAGES += \
+    camera.msm7x27a \
+    libmmcamera_interface2
+
 PRODUCT_PACKAGES += \
     gps.msm7x27a \
     lights.msm7x27a
