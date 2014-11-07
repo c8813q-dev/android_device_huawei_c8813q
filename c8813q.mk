@@ -198,10 +198,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.sf.lcd_density=240
 
 PRODUCT_PROPERTY_OVERRIDES += \
-    dalvik.vm.heapgrowthlimit=32m \
-    dalvik.vm.heapsize=64m
-
-PRODUCT_PROPERTY_OVERRIDES += \
     com.qc.hardware=true \
     dev.pm.dyn_sample_period=700000 \
     dev.pm.dyn_samplingrate=1 \
